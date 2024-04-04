@@ -1,7 +1,8 @@
 package com.kapturecrm.nlpqueryengineservice.utility;
 
 
-import org.apache.commons.lang.StringUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class NlpDashboardUtils {
     }
 
     public static String convertTableName(String prompt) {
-        if (StringUtils.isNotBlank(prompt)) {
+        if (StringUtils.isNotEmpty(prompt)) {
             prompt = prompt.toLowerCase();
             for (String key : nameConversionMap.keySet()) {
                 if (prompt.contains(key)) {

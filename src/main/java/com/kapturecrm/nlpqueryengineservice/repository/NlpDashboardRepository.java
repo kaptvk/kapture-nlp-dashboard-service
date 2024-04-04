@@ -1,9 +1,9 @@
 package com.kapturecrm.nlpqueryengineservice.repository;
 
+import com.google.gson.JsonObject;
 import com.kapturecrm.nlpqueryengineservice.utility.ClickHouseConnUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -34,8 +34,8 @@ public class NlpDashboardRepository {
         return resp;
     }
 
-    public JSONObject getDatabaseSchema(List<String> tableList) {
-        JSONObject tableSchema = new JSONObject();
+    public JsonObject getDatabaseSchema(List<String> tableList) {
+        JsonObject tableSchema = new JsonObject();
         Connection conn = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
@@ -44,13 +44,13 @@ public class NlpDashboardRepository {
                 DatabaseMetaData metaData = conn.getMetaData();
                 for (String tableName : tableList) {
                     ResultSet rs = metaData.getColumns(dbName, null, tableName, null);
-                    JSONObject schema = new JSONObject();
+                    JsonObject schema = new JsonObject();
                     while (rs.next()) {
                         String columnName = rs.getString("COLUMN_NAME");
                         String columnType = rs.getString("TYPE_NAME");
-                        schema.put(columnName, columnType);
+                        schema.addProperty(columnName, columnType);
                     }
-                    tableSchema.put(tableName, schema);
+                    tableSchema.add(tableName, schema);
                 }
             }
         } catch (Exception e) {
