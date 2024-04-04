@@ -35,9 +35,9 @@ public class NlpDashboardRepository {
             }
             while (rs.next()) {
                 LinkedHashMap<String, Object> rowObj = new LinkedHashMap<>();
-                for (int idx = 1; idx <= columnCount; ++idx) {
-                    final Object value = rs.getObject(idx);
-                    rowObj.put(columnNames.get(idx - 1), String.valueOf(value));
+                for (int idx = 0; idx <= columnCount; ++idx) {
+                    Object value = rs.getObject(idx);
+                    rowObj.put(columnNames.get(idx), String.valueOf(value));
                 }
                 resp.add(rowObj);
             }
