@@ -49,24 +49,21 @@ public class NlpDashboardRepository {
         return resp;
     }
 
-    public JSONObject getDatabaseSchema(List<String> tableList) {
-        JSONObject tableSchema = new JSONObject();
+    public void getDatabaseSchema(String tableName, JSONObject dbSchema) {
         Connection conn = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
             if (conn != null) {
                 String dbName = conn.getCatalog();
                 DatabaseMetaData metaData = conn.getMetaData();
-                for (String tableName : tableList) {
-                    ResultSet rs = metaData.getColumns(dbName, null, tableName, null);
-                    JSONObject schema = new JSONObject();
-                    while (rs.next()) {
-                        String columnName = rs.getString("COLUMN_NAME");
-                        String columnType = rs.getString("TYPE_NAME");
-                        schema.put(columnName, columnType);
-                    }
-                    tableSchema.put(tableName, schema);
+                ResultSet rs = metaData.getColumns(dbName, null, tableName, null);
+                JSONObject schema = new JSONObject();
+                while (rs.next()) {
+                    String columnName = rs.getString("COLUMN_NAME");
+                    String columnType = rs.getString("TYPE_NAME");
+                    schema.put(columnName, columnType);
                 }
+                dbSchema.put(tableName, schema);
             }
         } catch (Exception e) {
             log.error("Error in getDatabaseSchema", e);
@@ -75,7 +72,6 @@ public class NlpDashboardRepository {
                 ClickHouseConnUtil.closeConn(conn);
             }
         }
-        return tableSchema;
     }
 
 }

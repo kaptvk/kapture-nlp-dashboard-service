@@ -1,14 +1,24 @@
 package com.kapturecrm.nlpqueryengineservice.utility;
 
+import com.kapturecrm.nlpqueryengineservice.component.StaticContextAccessor;
+import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
+import lombok.RequiredArgsConstructor;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NlpDashboardUtils {
 
     private static final Map<String, String> entityNameToTableName = new HashMap<>();
@@ -26,19 +36,37 @@ public class NlpDashboardUtils {
     public record PromptInfo(String prompt, List<String> tableNames) {
     }
 
-    public static PromptInfo convertTableName(String prompt) {
+    private static final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+
+    public static PromptInfo convertTableNameAndFindDBSchema(String prompt, JSONObject dbSchema) {
+        NlpDashboardRepository nlpDashboardRepository = StaticContextAccessor.getBean(NlpDashboardRepository.class);
         List<String> tableNames = new ArrayList<>();
+        StringBuilder modifiedPrompt = new StringBuilder(prompt);
         if (StringUtils.isNotBlank(prompt)) {
             prompt = prompt.toLowerCase();
+            List<Future<?>> futures = new ArrayList<>();
             for (String key : prompt.split(" ")) {
                 if (entityNameToTableName.containsKey(key)) {
                     String tableName = entityNameToTableName.get(key);
+                    futures.add(threadPool.submit(() -> nlpDashboardRepository.getDatabaseSchema(tableName, dbSchema)));
                     tableNames.add(tableName);
-                    prompt = prompt.replace(key, tableName);
+                    int index = modifiedPrompt.indexOf(key);
+                    modifiedPrompt.replace(index, index + key.length(), tableName);
                 }
             }
+            waitForCompletion(futures);
         }
-        return new PromptInfo(prompt, tableNames);
+        return new PromptInfo(modifiedPrompt.toString(), tableNames);
+    }
+
+    private static void waitForCompletion(List<Future<?>> futures) {
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 }

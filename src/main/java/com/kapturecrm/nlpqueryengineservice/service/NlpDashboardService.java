@@ -1,5 +1,6 @@
 package com.kapturecrm.nlpqueryengineservice.service;
 
+import com.kapturecrm.object.PartnerUser;
 import net.sf.json.JSONObject;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
@@ -45,7 +46,8 @@ public class NlpDashboardService {
     private String validateAIGeneratedSQL(String aiReply) {
         String sql = aiReply.replace("[\n\r]", " ")
                 .replaceAll("[;]", "");
-        int cmId = SessionManager.getPartner(httpServletRequest).getCmId();
+        PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
+        int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
         if (!sql.contains("where")) {
             sql += " where cm_id = " + cmId;
         } else if (!sql.split("where")[1].contains("cm_id")) {
@@ -57,13 +59,11 @@ public class NlpDashboardService {
 
     private String getPromptForAI(String prompt) {
         try {
-            NlpDashboardUtils.PromptInfo promptInfo = NlpDashboardUtils.convertTableName(prompt);
-            prompt = promptInfo.prompt();
-            JSONObject dbSchema = nlpDashboardRepository.getDatabaseSchema(promptInfo.tableNames());
+            JSONObject dbSchema = new JSONObject();
+            NlpDashboardUtils.PromptInfo promptInfo = NlpDashboardUtils.convertTableNameAndFindDBSchema(prompt, dbSchema);
             prompt = "give clickhouse sql query for " +
-                    " prompt :" + prompt +
-                    " for tables schema :" + dbSchema.toString() +
-                    " ";
+                    " prompt :" + promptInfo.prompt() +
+                    " for tables schema :" + dbSchema.toString();
             //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
         } catch (Exception e) {
             log.error("Error in getCorrectedPrompt", e);
