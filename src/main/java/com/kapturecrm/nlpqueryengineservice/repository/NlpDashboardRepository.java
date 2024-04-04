@@ -33,7 +33,7 @@ public class NlpDashboardRepository {
                 JsonObject rowObj = new JsonObject();
                 for (int idx = 1; idx <= columnCount; ++idx) {
                     final Object value = rs.getObject(idx);
-                    rowObj.addProperty(columnNames.get(idx), String.valueOf(value));
+                    rowObj.addProperty(columnNames.get(idx-1), String.valueOf(value));
                 }
                 resp.add(rowObj);
             }
