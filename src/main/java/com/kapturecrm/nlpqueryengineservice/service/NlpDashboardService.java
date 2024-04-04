@@ -44,7 +44,8 @@ public class NlpDashboardService {
     private String validateAIGeneratedSQL(String aiReply) {
         // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
         String sql = aiReply.replace("[\n\r]", " ")
-                .replaceAll("[;]", "");
+                .replaceAll("[;]", "")
+                .toLowerCase();
         PartnerUser partnerUser = null;// SessionManager.getPartnerUser(httpServletRequest); // todo getting error
         int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
         if (!sql.contains("where")) {
