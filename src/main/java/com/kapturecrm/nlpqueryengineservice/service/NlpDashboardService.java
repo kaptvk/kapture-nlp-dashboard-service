@@ -1,6 +1,6 @@
 package com.kapturecrm.nlpqueryengineservice.service;
 
-import com.google.gson.JsonObject;
+import net.sf.json.JSONObject;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
@@ -59,7 +59,7 @@ public class NlpDashboardService {
         try {
             NlpDashboardUtils.PromptInfo promptInfo = NlpDashboardUtils.convertTableName(prompt);
             prompt = promptInfo.prompt();
-            JsonObject dbSchema = nlpDashboardRepository.getDatabaseSchema(promptInfo.tableNames());
+            JSONObject dbSchema = nlpDashboardRepository.getDatabaseSchema(promptInfo.tableNames());
             prompt = "give clickhouse sql query for " +
                     " prompt :" + prompt +
                     " for tables schema :" + dbSchema.toString() +
