@@ -12,16 +12,16 @@ import java.util.Map;
 @Component
 public class NlpDashboardUtils {
 
-    private static final Map<String, String> nameConversionMap = new HashMap<>();
+    private static final Map<String, String> entityNameToTableName = new HashMap<>();
 
     static {
-        nameConversionMap.put("customer", "cm_lead_member");
-        nameConversionMap.put("product", "cm_product");
-        nameConversionMap.put("employee", "cm_employee");
-        nameConversionMap.put("order", "cm_lead_confirmation_detail");
-        nameConversionMap.put("ticket", "cm_general_task");
-        nameConversionMap.put("queue", "task_queue_type");
-        nameConversionMap.put("folder", "task_folder");
+        entityNameToTableName.put("customer", "cm_lead_member");
+        entityNameToTableName.put("product", "cm_product");
+        entityNameToTableName.put("employee", "cm_employee");
+        entityNameToTableName.put("order", "cm_lead_confirmation_detail");
+        entityNameToTableName.put("ticket", "cm_general_task");
+        entityNameToTableName.put("queue", "task_queue_type");
+        entityNameToTableName.put("folder", "task_folder");
     }
 
     public record PromptInfo(String prompt, List<String> tableNames) {
@@ -31,9 +31,9 @@ public class NlpDashboardUtils {
         List<String> tableNames = new ArrayList<>();
         if (StringUtils.isNotBlank(prompt)) {
             prompt = prompt.toLowerCase();
-            for (String key : nameConversionMap.keySet()) {
-                if (prompt.contains(key)) {
-                    String tableName = nameConversionMap.get(key);
+            for (String key : prompt.split(" ")) {
+                if (entityNameToTableName.containsKey(key)) {
+                    String tableName = entityNameToTableName.get(key);
                     tableNames.add(tableName);
                     prompt = prompt.replace(key, tableName);
                 }
