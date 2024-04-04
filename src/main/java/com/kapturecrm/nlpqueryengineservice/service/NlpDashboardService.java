@@ -44,6 +44,7 @@ public class NlpDashboardService {
     }
 
     private String validateAIGeneratedSQL(String aiReply) {
+        // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
         String sql = aiReply.replace("[\n\r]", " ")
                 .replaceAll("[;]", "");
         PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
