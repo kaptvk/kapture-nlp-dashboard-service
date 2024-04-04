@@ -2,6 +2,7 @@ package com.kapturecrm.nlpqueryengineservice.service;
 
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
+import com.kapturecrm.nlpqueryengineservice.utils.NlpDashboardUtils;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class NlpDashboardService {
     }
 
     private String getCorrectedPrompt(String prompt) {
+        prompt = NlpDashboardUtils.convertTableName(prompt);
         String template = "";
         PromptTemplate promptTemplate = new PromptTemplate(template);
         return prompt;
