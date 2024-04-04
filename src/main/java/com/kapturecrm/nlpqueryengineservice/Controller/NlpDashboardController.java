@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/api/v1/kapGuru")
+@RestController("nlp-dashboard")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class NLPToQueryController {
+public class NlpDashboardController {
     private final KapGuruService kapGuruService;
 
-    @GetMapping("get-data-from-nlp")
+    @GetMapping("/generate")
     public ResponseEntity<?> getDataFromNlp(@RequestParam String text) {
         return kapGuruService.getDataFromNlp(text);
     }
