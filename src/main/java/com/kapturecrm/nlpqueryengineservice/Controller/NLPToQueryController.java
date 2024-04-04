@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController("/api/v1/kapGuru")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class KapGuruController {
+public class NLPToQueryController {
     private final KapGuruService kapGuruService;
 
     @GetMapping("get-data-from-nlp")
