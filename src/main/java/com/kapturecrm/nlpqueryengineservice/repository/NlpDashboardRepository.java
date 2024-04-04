@@ -1,13 +1,16 @@
 package com.kapturecrm.nlpqueryengineservice.repository;
 
-import com.google.gson.JsonObject;
+
 import com.kapturecrm.nlpqueryengineservice.utility.ClickHouseConnUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,8 +19,9 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NlpDashboardRepository {
 
-    public List<JsonObject> findNlpDashboardDataFromSql(String sql) {
-        List<JsonObject> resp = new LinkedList<>();
+
+    public List<LinkedHashMap<String, Object>> findNlpDashboardDataFromSql(String sql) {
+        List<LinkedHashMap<String, Object>> resp = new ArrayList<>();
         Connection conn = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
@@ -30,10 +34,10 @@ public class NlpDashboardRepository {
                 columnNames.add(meta.getColumnName(i));
             }
             while (rs.next()) {
-                JsonObject rowObj = new JsonObject();
+                LinkedHashMap<String, Object> rowObj = new LinkedHashMap<>();
                 for (int idx = 1; idx <= columnCount; ++idx) {
                     final Object value = rs.getObject(idx);
-                    rowObj.addProperty(columnNames.get(idx-1), String.valueOf(value));
+                    rowObj.put(columnNames.get(idx - 1), String.valueOf(value));
                 }
                 resp.add(rowObj);
             }
@@ -45,8 +49,8 @@ public class NlpDashboardRepository {
         return resp;
     }
 
-    public JsonObject getDatabaseSchema(List<String> tableList) {
-        JsonObject tableSchema = new JsonObject();
+    public JSONObject getDatabaseSchema(List<String> tableList) {
+        JSONObject tableSchema = new JSONObject();
         Connection conn = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
@@ -55,13 +59,13 @@ public class NlpDashboardRepository {
                 DatabaseMetaData metaData = conn.getMetaData();
                 for (String tableName : tableList) {
                     ResultSet rs = metaData.getColumns(dbName, null, tableName, null);
-                    JsonObject schema = new JsonObject();
+                    JSONObject schema = new JSONObject();
                     while (rs.next()) {
                         String columnName = rs.getString("COLUMN_NAME");
                         String columnType = rs.getString("TYPE_NAME");
-                        schema.addProperty(columnName, columnType);
+                        schema.put(columnName, columnType);
                     }
-                    tableSchema.add(tableName, schema);
+                    tableSchema.put(tableName, schema);
                 }
             }
         } catch (Exception e) {

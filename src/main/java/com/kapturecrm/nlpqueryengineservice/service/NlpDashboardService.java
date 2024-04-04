@@ -1,6 +1,6 @@
 package com.kapturecrm.nlpqueryengineservice.service;
 
-import com.google.gson.JsonObject;
+
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
@@ -8,6 +8,7 @@ import com.kapturecrm.nlpqueryengineservice.utility.NlpDashboardUtils;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +43,7 @@ public class NlpDashboardService {
     }
 
     private String validateAIGeneratedSQL(String aiReply) {
-        String sql = aiReply.replace("[\n\r]", " ")
-                .replaceAll("[;]", "");
+        String sql = aiReply.replace("[\n\r]", " ").replaceAll("[;]", "");
         // todo check cmId where clause
         // todo if date where clause is not present then add limit 1000
         return sql;
@@ -53,11 +53,8 @@ public class NlpDashboardService {
         try {
             NlpDashboardUtils.PromptInfo promptInfo = NlpDashboardUtils.convertTableName(prompt);
             prompt = promptInfo.prompt();
-            JsonObject dbSchema = nlpDashboardRepository.getDatabaseSchema(promptInfo.tableNames());
-            prompt = "give clickhouse sql query for " +
-                    " prompt :" + prompt +
-                    " for tables schema :" + dbSchema.toString() +
-                    " ";
+            JSONObject dbSchema = nlpDashboardRepository.getDatabaseSchema(promptInfo.tableNames());
+            prompt = "give clickhouse sql query for " + " prompt :" + prompt + " for tables schema :" + dbSchema.toString() + " ";
             //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
         } catch (Exception e) {
             log.error("Error in getCorrectedPrompt", e);
