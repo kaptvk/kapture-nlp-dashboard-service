@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice.utils;
+package com.kapturecrm.nlpqueryengineservice.utility;
 
 
 import org.apache.commons.lang.StringUtils;
@@ -26,7 +26,10 @@ public class NlpDashboardUtils {
         if (StringUtils.isNotBlank(prompt)) {
             prompt = prompt.toLowerCase();
             for (String key : nameConversionMap.keySet()) {
-                prompt = prompt.replace(key, nameConversionMap.get(key));
+                if (prompt.contains(key)) {
+
+                    prompt = prompt.replace(key, nameConversionMap.get(key));
+                }
             }
         }
         return prompt;

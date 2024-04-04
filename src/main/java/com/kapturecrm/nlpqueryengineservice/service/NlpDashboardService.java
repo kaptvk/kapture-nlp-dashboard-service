@@ -1,8 +1,9 @@
 package com.kapturecrm.nlpqueryengineservice.service;
 
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
+import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
-import com.kapturecrm.nlpqueryengineservice.utils.NlpDashboardUtils;
+import com.kapturecrm.nlpqueryengineservice.utility.NlpDashboardUtils;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +33,10 @@ public class NlpDashboardService {
         //todo extract correct sql from aiReply
         String sql = aiReply;
 
-        List<Object> dashboardResponse = getNlpDashboardData(sql);
-        return ResponseEntity.ok(dashboardResponse);
+        NlpDashboardResponse resp = new NlpDashboardResponse();
+        resp.setDashboardValues(getNlpDashboardData(sql));
+        resp.setDashboardType("table");
+        return ResponseEntity.ok(resp);
     }
 
     private String getCorrectedPrompt(String prompt) {
@@ -45,7 +48,9 @@ public class NlpDashboardService {
 
     private List<Object> getNlpDashboardData(String sql) {
         //todo
-        return nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
+        nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
+
+        return null;
     }
 
 }
