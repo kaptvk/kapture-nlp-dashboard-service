@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class NlpDashboardService {
 
@@ -14,10 +16,14 @@ public class NlpDashboardService {
     private String apiKey;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
+        String prompt = reqDto.getPrompt();
+        // replace entity name with actual table name
         OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
-        String answer = model.generate(reqDto.getPrompt());
-        System.out.println(answer);
-        return ResponseEntity.ok(answer);
+        String aiReply = model.generate(prompt);
+        // extract correct sql from aiReply
+        String sql = aiReply;
+        List<Object> dashboardResponse = null;
+        return ResponseEntity.ok(dashboardResponse);
     }
 
 }
