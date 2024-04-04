@@ -26,6 +26,7 @@ public class NlpDashboardService {
     private String apiKey;
 
     private final NlpDashboardRepository nlpDashboardRepository;
+    private final NlpDashboardUtils nlpDashboardUtils;
     private final HttpServletRequest httpServletRequest;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
@@ -44,7 +45,7 @@ public class NlpDashboardService {
         // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
         String sql = aiReply.replace("[\n\r]", " ")
                 .replaceAll("[;]", "");
-        PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
+        PartnerUser partnerUser = null;// SessionManager.getPartnerUser(httpServletRequest); // todo getting error
         int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
         if (!sql.contains("where")) {
             sql += " where cm_id = " + cmId;
@@ -58,10 +59,10 @@ public class NlpDashboardService {
     private String getPromptForAI(String prompt) {
         try {
             JSONObject dbSchema = new JSONObject();
-            NlpDashboardUtils.PromptInfo promptInfo = NlpDashboardUtils.convertTableNameAndFindDBSchema(prompt, dbSchema);
+            NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(prompt, dbSchema);
             prompt = "give clickhouse sql query for " +
                     " prompt :" + promptInfo.prompt() +
-                    " for tables schema :" + dbSchema.toString();
+                    " for tables schema :" + dbSchema;
             //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
         } catch (Exception e) {
             log.error("Error in getCorrectedPrompt", e);

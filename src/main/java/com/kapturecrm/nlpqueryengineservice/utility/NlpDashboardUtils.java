@@ -1,6 +1,5 @@
 package com.kapturecrm.nlpqueryengineservice.utility;
 
-import com.kapturecrm.nlpqueryengineservice.component.StaticContextAccessor;
 import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
 import lombok.RequiredArgsConstructor;
 import net.sf.json.JSONObject;
@@ -21,6 +20,8 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NlpDashboardUtils {
 
+    private final NlpDashboardRepository nlpDashboardRepo;
+
     private static final Map<String, String> entityNameToTableName = new HashMap<>();
 
     static {
@@ -38,8 +39,7 @@ public class NlpDashboardUtils {
 
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
-    public static PromptInfo convertTableNameAndFindDBSchema(String prompt, JSONObject dbSchema) {
-        NlpDashboardRepository nlpDashboardRepo = StaticContextAccessor.getBean(NlpDashboardRepository.class);
+    public PromptInfo convertTableNameAndFindDBSchema(String prompt, JSONObject dbSchema) {
         List<String> tableNames = new ArrayList<>();
         StringBuilder modifiedPrompt = new StringBuilder(prompt);
         if (StringUtils.isNotBlank(prompt)) {
