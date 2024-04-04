@@ -1,5 +1,6 @@
 package com.kapturecrm.nlpqueryengineservice.dto;
 
+import com.google.gson.JsonObject;
 import lombok.Data;
 
 import java.util.List;
@@ -7,5 +8,5 @@ import java.util.List;
 @Data
 public class NlpDashboardResponse {
     private String dashboardType;
-    private List<Object> dashboardValues;
+    private List<JsonObject> dashboardValues;
 }
