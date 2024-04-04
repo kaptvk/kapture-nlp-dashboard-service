@@ -39,7 +39,7 @@ public class NlpDashboardUtils {
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
     public static PromptInfo convertTableNameAndFindDBSchema(String prompt, JSONObject dbSchema) {
-        NlpDashboardRepository nlpDashboardRepository = StaticContextAccessor.getBean(NlpDashboardRepository.class);
+        NlpDashboardRepository nlpDashboardRepo = StaticContextAccessor.getBean(NlpDashboardRepository.class);
         List<String> tableNames = new ArrayList<>();
         StringBuilder modifiedPrompt = new StringBuilder(prompt);
         if (StringUtils.isNotBlank(prompt)) {
@@ -48,7 +48,7 @@ public class NlpDashboardUtils {
             for (String key : prompt.split(" ")) {
                 if (entityNameToTableName.containsKey(key)) {
                     String tableName = entityNameToTableName.get(key);
-                    futures.add(threadPool.submit(() -> nlpDashboardRepository.getDatabaseSchema(tableName, dbSchema)));
+                    futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema(tableName, dbSchema)));
                     tableNames.add(tableName);
                     int index = modifiedPrompt.indexOf(key);
                     modifiedPrompt.replace(index, index + key.length(), tableName);

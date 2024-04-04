@@ -49,7 +49,7 @@ public class NlpDashboardRepository {
         return resp;
     }
 
-    public void getDatabaseSchema(String tableName, JSONObject dbSchema) {
+    public void getDatabaseTableSchema(String tableName, JSONObject dbSchema) {
         Connection conn = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
