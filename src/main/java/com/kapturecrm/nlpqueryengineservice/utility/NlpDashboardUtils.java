@@ -1,6 +1,5 @@
 package com.kapturecrm.nlpqueryengineservice.utility;
 
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
