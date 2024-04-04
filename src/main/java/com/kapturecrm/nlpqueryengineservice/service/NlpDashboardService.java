@@ -29,11 +29,8 @@ public class NlpDashboardService {
     private final HttpServletRequest httpServletRequest;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
-        String prompt = reqDto.getPrompt();
-        prompt = getPromptForAI(reqDto.getPrompt());
-
         OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
-        String aiReply = model.generate(prompt);
+        String aiReply = model.generate(getPromptForAI(reqDto.getPrompt()));
 
         String sql = validateAIGeneratedSQL(aiReply);
 
