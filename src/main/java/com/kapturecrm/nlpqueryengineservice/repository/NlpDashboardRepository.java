@@ -3,13 +3,12 @@ package com.kapturecrm.nlpqueryengineservice.repository;
 import com.kapturecrm.nlpqueryengineservice.utility.ClickHouseConnUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.List;
 
 @Repository
@@ -35,19 +34,33 @@ public class NlpDashboardRepository {
         return resp;
     }
 
-    public List<String> getDatabaseSchema() {
-        List<String> schema = null;
+    public JSONObject getDatabaseSchema(List<String> tableList) {
+        JSONObject tableSchema = new JSONObject();
         Connection conn = null;
-        ResultSet rs = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
-            rs = conn != null ? conn.getMetaData().getCatalogs() : null;
-            schema = jdbcTemplate.queryForList("SHOW DATABASES", String.class);
+            if (conn != null) {
+                String dbName = conn.getCatalog();
+                DatabaseMetaData metaData = conn.getMetaData();
+                for (String tableName : tableList) {
+                    ResultSet rs = metaData.getColumns(dbName, null, tableName, null);
+                    JSONObject schema = new JSONObject();
+                    while (rs.next()) {
+                        String columnName = rs.getString("COLUMN_NAME");
+                        String columnType = rs.getString("TYPE_NAME");
+                        schema.put(columnName, columnType);
+                    }
+                    tableSchema.put(tableName, schema);
+                }
+            }
         } catch (Exception e) {
             log.error("Error in getDatabaseSchema", e);
+        } finally {
+            if (conn != null) {
+                ClickHouseConnUtil.closeConn(conn);
+            }
         }
-        return schema;
+        return tableSchema;
     }
-
 }
 
