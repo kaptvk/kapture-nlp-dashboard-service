@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 @Repository
@@ -19,32 +18,34 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NlpDashboardRepository {
 
-
     public List<LinkedHashMap<String, Object>> findNlpDashboardDataFromSql(String sql) {
         List<LinkedHashMap<String, Object>> resp = new ArrayList<>();
         Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery(sql);
-            final ResultSetMetaData meta = rs.getMetaData();
-            final int columnCount = meta.getColumnCount();
-            final List<String> columnNames = new LinkedList<>();
-            for (int i = 1; i <= columnCount; i++) {
-                columnNames.add(meta.getColumnName(i));
-            }
-            while (rs.next()) {
-                LinkedHashMap<String, Object> rowObj = new LinkedHashMap<>();
-                for (int idx = 1; idx <= columnCount; ++idx) {
-                    Object value = rs.getObject(idx);
-                    rowObj.put(columnNames.get(idx - 1), String.valueOf(value));
-                }
-                resp.add(rowObj);
-            }
+            rs = ps.executeQuery(sql);
         } catch (Exception e) {
             log.error("Error in findNlpDashboardDataFromSql", e);
         } finally {
             ClickHouseConnUtil.closeConn(conn);
+        }
+        try {
+            if (rs != null) {
+                final ResultSetMetaData meta = rs.getMetaData();
+                final int columnCount = meta.getColumnCount();
+                while (rs.next()) {
+                    LinkedHashMap<String, Object> rowObj = new LinkedHashMap<>();
+                    for (int idx = 1; idx <= columnCount; ++idx) {
+                        Object value = rs.getObject(idx);
+                        rowObj.put(meta.getColumnName(idx), String.valueOf(value));
+                    }
+                    resp.add(rowObj);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error in findNlpDashboardDataFromSql process rs: ", e);
         }
         return resp;
     }

@@ -6,7 +6,6 @@ import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
 import com.kapturecrm.nlpqueryengineservice.utility.NlpDashboardUtils;
-import com.kapturecrm.session.SessionManager;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +33,11 @@ public class NlpDashboardService {
         String aiReply = model.generate(getPromptForAI(reqDto.getPrompt()));
 
         String sql = validateAIGeneratedSQL(aiReply);
+        var values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
         NlpDashboardResponse resp = new NlpDashboardResponse();
-        resp.setDashboardValues(nlpDashboardRepository.findNlpDashboardDataFromSql(sql));
+        resp.setDashboardColumns(values.get(0).keySet());
+        resp.setDashboardValues(values);
         resp.setDashboardType("table");
         return ResponseEntity.ok(resp);
     }
@@ -61,8 +62,8 @@ public class NlpDashboardService {
         try {
             JSONObject dbSchema = new JSONObject();
             NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(prompt, dbSchema);
-            prompt = "give clickhouse sql query for " +
-                    " prompt :" + promptInfo.prompt() +
+            prompt = "give clickhouse sql query with less than 15 essential columns and exclude columns: id, cm_id, foreign keys " +
+                    " for prompt :" + promptInfo.prompt() +
                     " for tables schema :" + dbSchema;
             //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
         } catch (Exception e) {
