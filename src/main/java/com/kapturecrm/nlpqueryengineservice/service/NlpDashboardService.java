@@ -5,6 +5,7 @@ import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
 import com.kapturecrm.nlpqueryengineservice.utility.NlpDashboardUtils;
+import com.kapturecrm.session.SessionManager;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class NlpDashboardService {
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
         String prompt = reqDto.getPrompt();
-        prompt = getCorrectedPrompt(reqDto.getPrompt());
+        prompt = getPromptForAI(reqDto.getPrompt());
 
         OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
         String aiReply = model.generate(prompt);
@@ -44,12 +45,17 @@ public class NlpDashboardService {
     private String validateAIGeneratedSQL(String aiReply) {
         String sql = aiReply.replace("[\n\r]", " ")
                 .replaceAll("[;]", "");
-        // todo check cmId where clause
+        int cmId = SessionManager.getPartner(httpServletRequest).getCmId();
+        if (!sql.contains("where")) {
+            sql += " where cm_id = " + cmId;
+        } else if (!sql.split("where")[1].contains("cm_id")) {
+            sql = sql.replace("where", "where cm_id = " + cmId + " and ");
+        }
         // todo if date where clause is not present then add limit 1000
         return sql;
     }
 
-    private String getCorrectedPrompt(String prompt) {
+    private String getPromptForAI(String prompt) {
         try {
             NlpDashboardUtils.PromptInfo promptInfo = NlpDashboardUtils.convertTableName(prompt);
             prompt = promptInfo.prompt();
