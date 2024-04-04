@@ -24,8 +24,6 @@ public class NlpDashboardService {
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
         String prompt = reqDto.getPrompt();
-        //todo replace entity name with actual table name
-        //todo get schema
         prompt = getCorrectedPrompt(reqDto.getPrompt());
 
         OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);

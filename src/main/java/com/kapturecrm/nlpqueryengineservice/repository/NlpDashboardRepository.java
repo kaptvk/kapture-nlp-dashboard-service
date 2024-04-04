@@ -34,4 +34,20 @@ public class NlpDashboardRepository {
         }
         return resp;
     }
+
+    public List<String> getDatabaseSchema() {
+        List<String> schema = null;
+        Connection conn = null;
+        ResultSet rs = null;
+        try {
+            conn = ClickHouseConnUtil.getConnection();
+            rs = conn != null ? conn.getMetaData().getCatalogs() : null;
+            schema = jdbcTemplate.queryForList("SHOW DATABASES", String.class);
+        } catch (Exception e) {
+            log.error("Error in getDatabaseSchema", e);
+        }
+        return schema;
+    }
+
 }
+
