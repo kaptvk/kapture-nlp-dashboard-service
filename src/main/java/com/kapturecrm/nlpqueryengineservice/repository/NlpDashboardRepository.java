@@ -5,7 +5,6 @@ import com.kapturecrm.nlpqueryengineservice.utility.ClickHouseConnUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -16,7 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NlpDashboardRepository {
 
-    private final JdbcTemplate jdbcTemplate;
 
     public List<Object> findNlpDashboardDataFromSql(String sql) {
         List<Object> resp = null;
