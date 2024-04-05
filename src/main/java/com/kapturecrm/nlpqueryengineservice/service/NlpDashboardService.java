@@ -1,16 +1,16 @@
 package com.kapturecrm.nlpqueryengineservice.service;
 
-import com.kapturecrm.nlpqueryengineservice.utility.BaseResponse;
-import com.kapturecrm.object.PartnerUser;
-import com.kapturecrm.session.SessionManager;
-import net.sf.json.JSONObject;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
+import com.kapturecrm.nlpqueryengineservice.utility.BaseResponse;
 import com.kapturecrm.nlpqueryengineservice.utility.NlpDashboardUtils;
+import com.kapturecrm.object.PartnerUser;
+import com.kapturecrm.session.SessionManager;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -45,23 +45,22 @@ public class NlpDashboardService {
         }
         resp.setDashboardValues(values);
         resp.setDashboardType("table");
-        return baseResponse.successResponse(resp);
+        return ResponseEntity.ok(resp);
     }
 
     private String validateAIGeneratedSQL(String aiReply) {
         // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
-        String sql = aiReply.replace("[\n\r]", " ")
-                .replaceAll("[;]", "")
+        String sql = aiReply.replaceAll("[\n;]", " ")
                 .toLowerCase();
         PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest); // todo getting error
         int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
         if (!sql.contains("where")) {
-            if (sql.contains("limit")) {
-                sql = sql.replace("limit", "where cm_id = " + cmId + " limit");
-            } else if (sql.contains("order by")) {
+            if (sql.contains("order by")) {
                 sql = sql.replace("order by", "where cm_id = " + cmId + " order by");
             } else if (sql.contains("group by")) {
                 sql = sql.replace("group by", "where cm_id = " + cmId + " group by");
+            } else if (sql.contains("limit")) {
+                sql = sql.replace("limit", "where cm_id = " + cmId + " limit");
             } else {
                 sql += " where cm_id = " + cmId;
             }
