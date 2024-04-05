@@ -45,7 +45,7 @@ public class NlpDashboardService {
         }
         resp.setDashboardValues(values);
         resp.setDashboardType("table");
-        return baseResponse.successResponse(resp);
+        return ResponseEntity.ok(resp);
     }
 
     private String validateAIGeneratedSQL(String aiReply) {
