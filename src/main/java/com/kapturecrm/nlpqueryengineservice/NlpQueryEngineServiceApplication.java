@@ -5,15 +5,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @EnableEurekaClient
-@ComponentScan(basePackages = { "com.kapturecrm.*", "com.kapture.*"})
+@ComponentScan(basePackages = {"com.kapturecrm.*", "com.kapture.*"})
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@EnableScheduling
 public class NlpQueryEngineServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(NlpQueryEngineServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(NlpQueryEngineServiceApplication.class, args);
+    }
 
 }
