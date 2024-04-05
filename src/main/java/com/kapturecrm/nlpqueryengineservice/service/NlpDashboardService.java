@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -34,18 +35,23 @@ public class NlpDashboardService {
     private final BaseResponse baseResponse;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
-        OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
-        String aiReply = model.generate(getPromptForAI(reqDto.getPrompt()));
-        String sql = validateAIGeneratedSQL(aiReply);
-        List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
-
-        NlpDashboardResponse resp = new NlpDashboardResponse();
-        if (!values.isEmpty()) {
-            resp.setDashboardColumns(values.get(0).keySet());
+        try {
+            OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
+            String aiReply = model.generate(getPromptForAI(reqDto.getPrompt()));
+            String sqlQuery = validateAIGeneratedSQL(aiReply);
+            List<LinkedHashMap<String, Object>> dataList = nlpDashboardRepository.findNlpDashboardDataFromSql(sqlQuery);
+            if (dataList == null || dataList.isEmpty()) {
+                return baseResponse.errorResponse(HttpStatus.NOT_FOUND, "No data found for the given prompt");
+            }
+            NlpDashboardResponse resp = new NlpDashboardResponse();
+            resp.setDashboardColumns(dataList.get(0).keySet());
+            resp.setDashboardValues(dataList);
+            resp.setDashboardType(reqDto.getDashboardType());
+            return baseResponse.successResponse(resp);
+        } catch (Exception e) {
+            log.error("Error in generateNlpDashboard", e);
+            return baseResponse.errorResponse(e);
         }
-        resp.setDashboardValues(values);
-        resp.setDashboardType("table");
-        return baseResponse.successResponse(resp);
     }
 
     private String validateAIGeneratedSQL(String aiReply) {
