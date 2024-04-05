@@ -36,7 +36,9 @@ public class NlpDashboardService {
         var values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
         NlpDashboardResponse resp = new NlpDashboardResponse();
-        resp.setDashboardColumns(values.get(0).keySet());
+        if (!values.isEmpty()) {
+            resp.setDashboardColumns(values.get(0).keySet());
+        }
         resp.setDashboardValues(values);
         resp.setDashboardType("table");
         return ResponseEntity.ok(resp);
@@ -50,7 +52,15 @@ public class NlpDashboardService {
         PartnerUser partnerUser = null;// SessionManager.getPartnerUser(httpServletRequest); // todo getting error
         int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
         if (!sql.contains("where")) {
-            sql += " where cm_id = " + cmId;
+            if (sql.contains("limit")) {
+                sql = sql.replace("limit", "where cm_id = " + cmId + " limit");
+            } else if (sql.contains("order by")) {
+                sql = sql.replace("order by", "where cm_id = " + cmId + " order by");
+            } else if (sql.contains("group by")) {
+                sql = sql.replace("group by", "where cm_id = " + cmId + " group by");
+            } else {
+                sql += " where cm_id = " + cmId;
+            }
         } else if (!sql.split("where")[1].contains("cm_id")) {
             sql = sql.replace("where", "where cm_id = " + cmId + " and ");
         }
@@ -63,8 +73,8 @@ public class NlpDashboardService {
             JSONObject dbSchema = new JSONObject();
             NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(prompt, dbSchema);
             prompt = "give clickhouse sql query with less than 15 essential columns and exclude columns: id, cm_id, foreign keys " +
-                    " for prompt :" + promptInfo.prompt() +
-                    " for tables schema :" + dbSchema;
+                    " for prompt: " + promptInfo.prompt() +
+                    " for tables schema: " + dbSchema;
             //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
         } catch (Exception e) {
             log.error("Error in getCorrectedPrompt", e);

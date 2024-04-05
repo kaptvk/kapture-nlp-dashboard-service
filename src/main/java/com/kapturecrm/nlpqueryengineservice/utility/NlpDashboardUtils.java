@@ -26,6 +26,7 @@ public class NlpDashboardUtils {
 
     static {
         entityNameToTableName.put("customer", "cm_lead_member");
+        entityNameToTableName.put("customers", "cm_lead_member");
         entityNameToTableName.put("product", "cm_product");
         entityNameToTableName.put("employee", "cm_employee");
         entityNameToTableName.put("order", "cm_lead_confirmation_detail");
