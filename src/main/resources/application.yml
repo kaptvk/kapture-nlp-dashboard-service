@@ -1,0 +1,30 @@
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${server.eureka-username}:${server.eureka-password}@${server.eureka-instance-name}:8761/eureka/
+    healthcheck:
+      enabled: true
+  instance:
+    hostname: ${server.ms-3-instance-name}
+    health-check-url-path: /actuator/health
+    status-page-url-path: /actuator/info
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+    logfile:
+      enabled: true
+      external-file: logs/${server.logname}
+
+logging:
+  file:
+    name: logs/${server.logname}
+    path: logs/
+

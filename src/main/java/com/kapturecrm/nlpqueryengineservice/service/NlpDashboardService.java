@@ -1,6 +1,7 @@
 package com.kapturecrm.nlpqueryengineservice.service;
 
 import com.kapturecrm.object.PartnerUser;
+import com.kapturecrm.session.SessionManager;
 import net.sf.json.JSONObject;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
@@ -49,7 +50,7 @@ public class NlpDashboardService {
         String sql = aiReply.replace("[\n\r]", " ")
                 .replaceAll("[;]", "")
                 .toLowerCase();
-        PartnerUser partnerUser = null;// SessionManager.getPartnerUser(httpServletRequest); // todo getting error
+        PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest); // todo getting error
         int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
         if (!sql.contains("where")) {
             if (sql.contains("limit")) {
