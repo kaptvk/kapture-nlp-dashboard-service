@@ -1,5 +1,6 @@
 package com.kapturecrm.nlpqueryengineservice.service;
 
+import com.kapturecrm.nlpqueryengineservice.utility.BaseResponse;
 import com.kapturecrm.object.PartnerUser;
 import com.kapturecrm.session.SessionManager;
 import net.sf.json.JSONObject;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -28,13 +31,13 @@ public class NlpDashboardService {
     private final NlpDashboardRepository nlpDashboardRepository;
     private final NlpDashboardUtils nlpDashboardUtils;
     private final HttpServletRequest httpServletRequest;
+    private final BaseResponse baseResponse;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
         OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
         String aiReply = model.generate(getPromptForAI(reqDto.getPrompt()));
-
         String sql = validateAIGeneratedSQL(aiReply);
-        var values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
+        List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
         NlpDashboardResponse resp = new NlpDashboardResponse();
         if (!values.isEmpty()) {
@@ -42,7 +45,7 @@ public class NlpDashboardService {
         }
         resp.setDashboardValues(values);
         resp.setDashboardType("table");
-        return ResponseEntity.ok(resp);
+        return baseResponse.successResponse(resp);
     }
 
     private String validateAIGeneratedSQL(String aiReply) {
