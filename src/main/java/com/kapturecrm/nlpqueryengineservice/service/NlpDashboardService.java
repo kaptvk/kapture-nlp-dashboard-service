@@ -10,6 +10,7 @@ import com.kapturecrm.session.SessionManager;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,15 +44,18 @@ public class NlpDashboardService {
         String aiReply = model.generate(getPromptForAI(cmId, reqDto));
         String sql = validateAIGeneratedSQL(cmId, aiReply);
         log.info("finalSql: {}", sql);
+        System.out.println("sql "+ sql);
         List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
         NlpDashboardResponse resp = new NlpDashboardResponse();
         if (reqDto.getDashboardType().equalsIgnoreCase("text")) {
             String textResp = model.generate(
                     "prompt: " + reqDto.getPrompt() +
-                            " data: " + JSONObject.fromObject(values).toString() +
-                            " for above prompt give me a text response by analyzing the data"
+                            " data: " + JSONArray.fromObject(values).toString() +
+                            " for above prompt give me a detail text response within 120 words by analyzing the data "
             );
+            System.out.println(textResp);
+            resp.setDashboardType("text");
             resp.setTextResponse(textResp);
         } else {
             if (!values.isEmpty()) {
