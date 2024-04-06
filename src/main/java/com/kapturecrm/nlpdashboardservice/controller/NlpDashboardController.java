@@ -1,9 +1,9 @@
-package com.kapturecrm.nlpqueryengineservice.controller;
+package com.kapturecrm.nlpdashboardservice.controller;
 
-import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
-import com.kapturecrm.nlpqueryengineservice.dto.FeedbackDto;
-import com.kapturecrm.nlpqueryengineservice.service.NlpDashboardPromptService;
-import com.kapturecrm.nlpqueryengineservice.service.NlpDashboardService;
+import com.kapturecrm.nlpdashboardservice.dto.FeedbackDto;
+import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardReqDto;
+import com.kapturecrm.nlpdashboardservice.service.NlpDashboardService;
+import com.kapturecrm.nlpdashboardservice.service.NlpDashboardPromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/nlp-dashboard")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NlpDashboardController {
+
     private final NlpDashboardService nlpDashboardService;
     private final NlpDashboardPromptService nlpDashboardPromptService;
 

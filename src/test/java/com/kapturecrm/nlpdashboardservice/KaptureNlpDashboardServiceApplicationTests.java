@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice;
+package com.kapturecrm.nlpdashboardservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

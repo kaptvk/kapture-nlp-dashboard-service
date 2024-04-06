@@ -1,6 +1,6 @@
-package com.kapturecrm.nlpqueryengineservice.utility;
+package com.kapturecrm.nlpdashboardservice.utility;
 
-import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
+import com.kapturecrm.nlpdashboardservice.repository.NlpDashboardRepository;
 import lombok.RequiredArgsConstructor;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;

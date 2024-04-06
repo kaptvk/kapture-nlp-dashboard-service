@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice.utility;
+package com.kapturecrm.nlpdashboardservice.utility;
 
 import org.springframework.stereotype.Component;
 

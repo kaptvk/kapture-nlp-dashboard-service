@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice;
+package com.kapturecrm.nlpdashboardservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

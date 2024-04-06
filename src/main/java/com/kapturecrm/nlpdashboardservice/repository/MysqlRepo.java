@@ -1,6 +1,6 @@
-package com.kapturecrm.nlpqueryengineservice.repository;
+package com.kapturecrm.nlpdashboardservice.repository;
 
-import com.kapturecrm.nlpqueryengineservice.Object.NlpDashboardPrompt;
+import com.kapturecrm.nlpdashboardservice.Object.NlpDashboardPrompt;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

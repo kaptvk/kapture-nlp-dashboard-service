@@ -1,5 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice.dto;
-
+package com.kapturecrm.nlpdashboardservice.dto;
 
 import lombok.Data;
 

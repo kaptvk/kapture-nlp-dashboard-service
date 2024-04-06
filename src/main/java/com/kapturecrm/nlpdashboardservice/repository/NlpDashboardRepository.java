@@ -1,8 +1,8 @@
-package com.kapturecrm.nlpqueryengineservice.repository;
+package com.kapturecrm.nlpdashboardservice.repository;
 
 
-import com.kapturecrm.nlpqueryengineservice.cache.TableNameToSchemaCache;
-import com.kapturecrm.nlpqueryengineservice.utility.ClickHouseConnUtil;
+import com.kapturecrm.nlpdashboardservice.cache.TableNameToSchemaCache;
+import com.kapturecrm.nlpdashboardservice.utility.ClickHouseConnUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;

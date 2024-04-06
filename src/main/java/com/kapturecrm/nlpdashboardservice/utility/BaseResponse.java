@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice.utility;
+package com.kapturecrm.nlpdashboardservice.utility;
 
 import lombok.Data;
 import org.springframework.http.HttpStatus;

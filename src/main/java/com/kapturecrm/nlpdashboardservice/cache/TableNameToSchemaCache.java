@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice.cache;
+package com.kapturecrm.nlpdashboardservice.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

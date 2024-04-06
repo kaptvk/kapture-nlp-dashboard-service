@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice.Object;
+package com.kapturecrm.nlpdashboardservice.Object;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

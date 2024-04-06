@@ -1,12 +1,12 @@
-package com.kapturecrm.nlpqueryengineservice.service;
+package com.kapturecrm.nlpdashboardservice.service;
 
-import com.kapturecrm.nlpqueryengineservice.Object.NlpDashboardPrompt;
-import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardReqDto;
-import com.kapturecrm.nlpqueryengineservice.dto.NlpDashboardResponse;
-import com.kapturecrm.nlpqueryengineservice.repository.MysqlRepo;
-import com.kapturecrm.nlpqueryengineservice.repository.NlpDashboardRepository;
-import com.kapturecrm.nlpqueryengineservice.utility.BaseResponse;
-import com.kapturecrm.nlpqueryengineservice.utility.NlpDashboardUtils;
+import com.kapturecrm.nlpdashboardservice.Object.NlpDashboardPrompt;
+import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardReqDto;
+import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardResponse;
+import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
+import com.kapturecrm.nlpdashboardservice.repository.NlpDashboardRepository;
+import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
+import com.kapturecrm.nlpdashboardservice.utility.NlpDashboardUtils;
 import com.kapturecrm.object.PartnerUser;
 import com.kapturecrm.session.SessionManager;
 import com.kapturecrm.utilobj.CommonUtils;
@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static com.kapturecrm.nlpqueryengineservice.utility.ConversionUtil.getTimestampForSql;
+import static com.kapturecrm.nlpdashboardservice.utility.ConversionUtil.getTimestampForSql;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -61,7 +61,9 @@ public class NlpDashboardService {
             NlpDashboardResponse resp = new NlpDashboardResponse();
             switch (reqDto.getDashboardType().toLowerCase()) {
                 case "text" -> {
-                    String textResp = model.generate("prompt: " + reqDto.getPrompt() + " data: " + JSONArray.fromObject(values).toString() + " for above prompt give me a detail text response within 120 words by analyzing the data ");
+                    String textResp = model.generate("prompt: " + reqDto.getPrompt() +
+                            " data: " + JSONArray.fromObject(values).toString() +
+                            " for above prompt give me a detail text response within 120 words by analyzing the data ");
                     System.out.println(textResp);
                     resp.setTextResponse(textResp);
                 }
@@ -95,7 +97,8 @@ public class NlpDashboardService {
         String sql = aiReply.replaceAll("[\n;]", " ");
         if (!(sql.contains("WHERE") || sql.contains("where"))) {
             sql += " where cm_id = " + cmId;
-        } else if (sql.contains("WHERE") && !sql.split(" WHERE ")[1].contains("cm_id") || sql.contains("where") && sql.split(" where ")[1].contains("cm_id")) {
+        } else if (sql.contains("WHERE") && !sql.split(" WHERE ")[1].contains("cm_id")
+                || sql.contains("where") && sql.split(" where ")[1].contains("cm_id")) {
             sql = sql.replace("where", "where cm_id = " + cmId + " and ");
         }
         // todo if date where clause is not present then add limit 1000
@@ -107,7 +110,10 @@ public class NlpDashboardService {
         if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
             prompt += " with less than 15 essential columns";
         } else {
-            prompt += " with required columns for making " + reqDto.getDashboardType() + ", adding any alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" + " column used for alias value should be a number datatype";
+            prompt += " with required columns for making " + reqDto.getDashboardType() +
+                    ", adding any alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
+                    " column used for alias `value` must be a number datatype and type will be the meaningful name of the column used for alias `value`" +
+                    " also there can be multiple different type, hence value can be calculated based on type";
         }
         prompt += " and exclude selecting columns: id, cm_id";
         prompt += "\nand include cm_id = " + cmId + " in where clause";
@@ -121,6 +127,5 @@ public class NlpDashboardService {
         //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo
         return prompt;
     }
-
 
 }

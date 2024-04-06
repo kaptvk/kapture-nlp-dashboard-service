@@ -1,9 +1,9 @@
-package com.kapturecrm.nlpqueryengineservice.service;
+package com.kapturecrm.nlpdashboardservice.service;
 
-import com.kapturecrm.nlpqueryengineservice.Object.NlpDashboardPrompt;
-import com.kapturecrm.nlpqueryengineservice.dto.FeedbackDto;
-import com.kapturecrm.nlpqueryengineservice.repository.MysqlRepo;
-import com.kapturecrm.nlpqueryengineservice.utility.BaseResponse;
+import com.kapturecrm.nlpdashboardservice.Object.NlpDashboardPrompt;
+import com.kapturecrm.nlpdashboardservice.dto.FeedbackDto;
+import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
+import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
 import com.kapturecrm.object.PartnerUser;
 import com.kapturecrm.session.SessionManager;
 import lombok.RequiredArgsConstructor;

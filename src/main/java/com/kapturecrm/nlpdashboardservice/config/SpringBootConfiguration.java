@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice.config;
+package com.kapturecrm.nlpdashboardservice.config;
 
 
 import com.zaxxer.hikari.HikariConfig;
