@@ -1,8 +1,9 @@
 package com.kapturecrm.nlpdashboardservice.service;
 
-import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
 import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardResponse;
+import com.kapturecrm.nlpdashboardservice.exception.KaptureException;
+import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
 import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
 import com.kapturecrm.nlpdashboardservice.repository.NlpDashboardRepository;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
@@ -50,19 +51,18 @@ public class NlpDashboardService {
 
             NlpDashboardPrompt nlpDashboardprompt = new NlpDashboardPrompt();
             setData(nlpDashboardprompt, cmId, empId, reqDto);
-
             Thread promptSaveThread = new Thread(() -> mysqlRepo.addPrompt(nlpDashboardprompt));
             promptSaveThread.start();
 
-            OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
-            String aiReply = model.generate(getPromptForAI(cmId, reqDto));
+            OpenAiChatModel openAiModel = OpenAiChatModel.withApiKey(apiKey);
+            String aiReply = openAiModel.generate(getPromptForAI(cmId, reqDto));
             String sql = validateAIGeneratedSQL(cmId, aiReply);
-            log.info("Generated SQL: {}", sql);
+            log.info("FINAL-NLP-SQL: {}", sql);
             List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
             switch (reqDto.getDashboardType().toLowerCase()) {
                 case "text" -> {
-                    String textResp = model.generate("prompt: " + reqDto.getPrompt() +
+                    String textResp = openAiModel.generate("prompt: " + reqDto.getPrompt() +
                             " data: " + JSONArray.fromObject(values).toString() +
                             " for above prompt give me a detail text response in less than 120 words by analyzing the data ");
                     resp.setTextResponse(textResp);
@@ -82,6 +82,9 @@ public class NlpDashboardService {
             resp.setPromptId(nlpDashboardprompt.getId());
 
             return baseResponse.successResponse(resp);
+        } catch (KaptureException ke) {
+            log.warn("Error in generateNlpDashboard" + ke.getBaseResponse());
+            return ke.getBaseResponse();
         } catch (Exception e) {
             log.error("Error in generateNlpDashboard", e);
             return baseResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
@@ -97,9 +100,12 @@ public class NlpDashboardService {
     }
 
 
-    private String validateAIGeneratedSQL(int cmId, String aiReply) {
+    private String validateAIGeneratedSQL(int cmId, String aiReply) throws KaptureException {
         // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
         String sql = aiReply.replaceAll("[\n;]", " ");
+        if (!(sql.startsWith("SELECT") || sql.startsWith("select"))) {
+            throw new KaptureException(baseResponse.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, "Only select operation supported!"));
+        }
         if (!(sql.contains("WHERE") || sql.contains("where"))) {
             sql += " where cm_id = " + cmId;
         } else if (sql.contains("WHERE") && !sql.split(" WHERE ")[1].contains("cm_id")
