@@ -1,6 +1,7 @@
 package com.kapturecrm.nlpqueryengineservice.repository;
 
 
+import com.kapturecrm.nlpqueryengineservice.cache.TableNameToSchemaCache;
 import com.kapturecrm.nlpqueryengineservice.utility.ClickHouseConnUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,11 +13,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NlpDashboardRepository {
+
+    private final TableNameToSchemaCache tableNameToSchemaCache;
 
     public List<LinkedHashMap<String, Object>> findNlpDashboardDataFromSql(String sql) {
         List<LinkedHashMap<String, Object>> resp = new ArrayList<>();
@@ -51,13 +55,27 @@ public class NlpDashboardRepository {
     }
 
     public void getDatabaseTableSchema(String tableName, JSONObject dbSchema) {
+        Optional<String> tableSchema = tableNameToSchemaCache.get(tableName);
+        if (tableSchema.isPresent()) {
+            dbSchema.put(tableName, tableSchema.get());
+            return;
+        }
         Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
             if (conn != null) {
                 String dbName = conn.getCatalog();
                 DatabaseMetaData metaData = conn.getMetaData();
-                ResultSet rs = metaData.getColumns(dbName, null, tableName, null);
+                rs = metaData.getColumns(dbName, null, tableName, null);
+            }
+        } catch (Exception e) {
+            log.error("Error in getDatabaseSchema", e);
+        } finally {
+            ClickHouseConnUtil.closeConn(conn);
+        }
+        try {
+            if (rs != null) {
                 JSONObject schema = new JSONObject();
                 while (rs.next()) {
                     String columnName = rs.getString("COLUMN_NAME");
@@ -65,13 +83,10 @@ public class NlpDashboardRepository {
                     schema.put(columnName, columnType);
                 }
                 dbSchema.put(tableName, schema);
+                tableNameToSchemaCache.put(tableName, schema.toString());
             }
         } catch (Exception e) {
             log.error("Error in getDatabaseSchema", e);
-        } finally {
-            if (conn != null) {
-                ClickHouseConnUtil.closeConn(conn);
-            }
         }
     }
 

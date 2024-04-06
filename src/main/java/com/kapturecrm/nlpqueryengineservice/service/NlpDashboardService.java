@@ -35,7 +35,7 @@ public class NlpDashboardService {
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
         OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
-        String aiReply = model.generate(getPromptForAI(reqDto.getPrompt()));
+        String aiReply = model.generate(getPromptForAI(reqDto));
         String sql = validateAIGeneratedSQL(aiReply);
         log.info("finalSql: {}", sql);
         List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
@@ -72,17 +72,16 @@ public class NlpDashboardService {
         return sql;
     }
 
-    private String getPromptForAI(String prompt) {
-        try {
-            JSONObject dbSchema = new JSONObject();
-            NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(prompt, dbSchema);
-            prompt = "give clickhouse sql query with less than 15 essential columns and exclude columns: id, cm_id, foreign keys " +
-                    " for prompt: " + promptInfo.prompt() +
-                    " for tables schema: " + dbSchema;
-            //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
-        } catch (Exception e) {
-            log.error("Error in getCorrectedPrompt", e);
+    private String getPromptForAI(NlpDashboardReqDto reqDto) {
+        String prompt = "give clickhouse sql query with less than 15 essential columns and exclude columns: id, cm_id ";
+        JSONObject dbSchema = new JSONObject();
+        NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
+        prompt += " for prompt: " + promptInfo.prompt();
+        if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) {
+            prompt += " in date range: " + reqDto.getStartDate() + " to " + reqDto.getEndDate();
         }
+        prompt += " for tables schema: " + dbSchema;
+        //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
         return prompt;
     }
 

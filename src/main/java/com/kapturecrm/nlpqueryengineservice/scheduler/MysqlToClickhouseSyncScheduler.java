@@ -1,4 +1,4 @@
-package com.kapturecrm.nlpqueryengineservice.controller.scheduler;
+package com.kapturecrm.nlpqueryengineservice.scheduler;
 
 import com.kapturecrm.nlpqueryengineservice.service.MySqlToClickHouseSyncService;
 import lombok.RequiredArgsConstructor;
