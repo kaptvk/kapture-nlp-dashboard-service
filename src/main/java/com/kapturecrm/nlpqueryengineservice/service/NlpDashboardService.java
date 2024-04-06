@@ -41,11 +41,20 @@ public class NlpDashboardService {
         List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
         NlpDashboardResponse resp = new NlpDashboardResponse();
-        if (!values.isEmpty()) {
-            resp.setDashboardColumns(values.get(0).keySet());
+        if (reqDto.getDashboardType().equalsIgnoreCase("text")) {
+            String textResp = model.generate(
+                    "prompt: " + reqDto.getPrompt() +
+                            "data: " + JSONObject.fromObject(values).toString() +
+                            "for above prompt give me a text response by analyzing the data"
+            );
+            resp.setTextResponse(textResp);
+        } else {
+            if (!values.isEmpty()) {
+                resp.setDashboardColumns(values.get(0).keySet());
+            }
+            resp.setDashboardValues(values);
+            resp.setDashboardType("table");
         }
-        resp.setDashboardValues(values);
-        resp.setDashboardType("table");
         return ResponseEntity.ok(resp);
     }
 

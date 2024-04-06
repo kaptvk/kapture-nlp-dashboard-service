@@ -12,4 +12,5 @@ public class NlpDashboardResponse {
     private String dashboardType;
     private Collection<String> dashboardColumns;
     private List<LinkedHashMap<String, Object>> dashboardValues;
+    private String textResponse;
 }
