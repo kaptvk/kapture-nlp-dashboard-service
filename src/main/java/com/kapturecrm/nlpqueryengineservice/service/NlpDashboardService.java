@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static com.kapturecrm.nlpqueryengineservice.utility.ConversionUtil.getTimestampForSql;
+
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
@@ -55,7 +57,7 @@ public class NlpDashboardService {
             resp.setDashboardValues(values);
             resp.setDashboardType("table");
         }
-        return ResponseEntity.ok(resp);
+        return baseResponse.successResponse(resp);
     }
 
     private String validateAIGeneratedSQL(String aiReply) {
@@ -82,14 +84,14 @@ public class NlpDashboardService {
     }
 
     private String getPromptForAI(NlpDashboardReqDto reqDto) {
-        String prompt = "give clickhouse sql query with less than 15 essential columns and exclude columns: id, cm_id ";
+        String prompt = "give ClickHouse sql query with less than 15 essential columns and exclude columns: id, cm_id ";
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
-        prompt += " for prompt: " + promptInfo.prompt();
-//        if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) { // todo train openaimodal for clickhouse timestamp syntax
-//            prompt += " in date range: " + reqDto.getStartDate() + " to " + reqDto.getEndDate();
-//        }
-        prompt += " for tables schema: " + dbSchema;
+        prompt += "\nfor prompt: " + promptInfo.prompt();
+        if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) { // todo train openaimodal for clickhouse timestamp syntax
+            prompt += "\nin date range: " + getTimestampForSql(reqDto.getStartDate()) + " to " + getTimestampForSql(reqDto.getEndDate());
+        }
+        prompt += "\nfor tables schema: " + dbSchema;
         //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
         return prompt;
     }
