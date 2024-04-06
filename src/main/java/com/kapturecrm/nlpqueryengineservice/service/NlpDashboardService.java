@@ -44,8 +44,8 @@ public class NlpDashboardService {
         if (reqDto.getDashboardType().equalsIgnoreCase("text")) {
             String textResp = model.generate(
                     "prompt: " + reqDto.getPrompt() +
-                            "data: " + JSONObject.fromObject(values).toString() +
-                            "for above prompt give me a text response by analyzing the data"
+                            " data: " + JSONObject.fromObject(values).toString() +
+                            " for above prompt give me a text response by analyzing the data"
             );
             resp.setTextResponse(textResp);
         } else {
