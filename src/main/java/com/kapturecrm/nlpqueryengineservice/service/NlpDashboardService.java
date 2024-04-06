@@ -36,9 +36,12 @@ public class NlpDashboardService {
     private final BaseResponse baseResponse;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
+        PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
+        int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
+
         OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
-        String aiReply = model.generate(getPromptForAI(reqDto));
-        String sql = validateAIGeneratedSQL(aiReply);
+        String aiReply = model.generate(getPromptForAI(cmId, reqDto));
+        String sql = validateAIGeneratedSQL(cmId, aiReply);
         log.info("finalSql: {}", sql);
         List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
@@ -60,31 +63,21 @@ public class NlpDashboardService {
         return baseResponse.successResponse(resp);
     }
 
-    private String validateAIGeneratedSQL(String aiReply) {
+    private String validateAIGeneratedSQL(int cmId, String aiReply) {
         // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
-        String sql = aiReply.replaceAll("[\n;]", " ")
-                .toLowerCase();
-        PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest); // todo getting error
-        int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
-        if (!sql.contains("where")) {
-            if (sql.contains("order by")) {
-                sql = sql.replace("order by", "where cm_id = " + cmId + " order by");
-            } else if (sql.contains("group by")) {
-                sql = sql.replace("group by", "where cm_id = " + cmId + " group by");
-            } else if (sql.contains("limit")) {
-                sql = sql.replace("limit", "where cm_id = " + cmId + " limit");
-            } else {
-                sql += " where cm_id = " + cmId;
-            }
-        } else if (!sql.split("where")[1].contains("cm_id")) {
+        String sql = aiReply.replaceAll("[\n;]", " ");
+        if (!(sql.contains("WHERE") || sql.contains("where"))) {
+            sql += " where cm_id = " + cmId;
+        } else if (sql.contains("WHERE") && !sql.split(" WHERE ")[1].contains("cm_id")
+                || sql.contains("where") && sql.split(" where ")[1].contains("cm_id")) {
             sql = sql.replace("where", "where cm_id = " + cmId + " and ");
         }
         // todo if date where clause is not present then add limit 1000
         return sql;
     }
 
-    private String getPromptForAI(NlpDashboardReqDto reqDto) {
-        String prompt = "give ClickHouse sql query with less than 15 essential columns and exclude columns: id, cm_id ";
+    private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
+        String prompt = "give ClickHouse sql query with less than 15 essential columns and exclude columns: id, cm_id and include cm_id = " + cmId + " in where clause";
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
         prompt += "\nfor prompt: " + promptInfo.prompt();
