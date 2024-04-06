@@ -31,8 +31,8 @@ public class NlpDashboardPromptService {
                 NlpDashboardPrompt nlpDashboardPrompt = new NlpDashboardPrompt();
                 nlpDashboardPrompt.setId(feedbackDto.getPromptId());
                 nlpDashboardPrompt.setIsSatisfied(feedbackDto.getIsSatisfied());
-                if (!feedbackDto.getIsSatisfied() && feedbackDto.getSuggestion() != null) {
-                    nlpDashboardPrompt.setSuggestion(feedbackDto.getSuggestion());
+                if (!feedbackDto.getIsSatisfied() && feedbackDto.getFeedback() != null) {
+                    nlpDashboardPrompt.setFeedback(feedbackDto.getFeedback());
                 }
                 if (mysqlRepo.addPrompt(nlpDashboardPrompt)) {
                     return baseResponse.successResponse("Feedback updated successfully.");

@@ -6,5 +6,5 @@ import lombok.Data;
 public class FeedbackDto {
     private int promptId;
     private Boolean isSatisfied;
-    private String suggestion;
+    private String feedback;
 }

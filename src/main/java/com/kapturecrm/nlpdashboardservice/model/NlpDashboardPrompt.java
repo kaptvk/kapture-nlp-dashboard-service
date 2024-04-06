@@ -36,7 +36,7 @@ public class NlpDashboardPrompt {
     @Column(name = "is_satisfied")
     private Boolean isSatisfied;
 
-    @Column(name = "suggestion")
-    private String suggestion;
+    @Column(name = "feedback")
+    private String feedback;
 
 }
