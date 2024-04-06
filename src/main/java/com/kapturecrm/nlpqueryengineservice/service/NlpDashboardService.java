@@ -77,9 +77,9 @@ public class NlpDashboardService {
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
         prompt += " for prompt: " + promptInfo.prompt();
-        if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) {
-            prompt += " in date range: " + reqDto.getStartDate() + " to " + reqDto.getEndDate();
-        }
+//        if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) { // todo train openaimodal for clickhouse timestamp syntax
+//            prompt += " in date range: " + reqDto.getStartDate() + " to " + reqDto.getEndDate();
+//        }
         prompt += " for tables schema: " + dbSchema;
         //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
         return prompt;
