@@ -44,25 +44,29 @@ public class NlpDashboardService {
         String aiReply = model.generate(getPromptForAI(cmId, reqDto));
         String sql = validateAIGeneratedSQL(cmId, aiReply);
         log.info("finalSql: {}", sql);
-        System.out.println("sql "+ sql);
+        System.out.println("finalSql " + sql);
         List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
         NlpDashboardResponse resp = new NlpDashboardResponse();
-        if (reqDto.getDashboardType().equalsIgnoreCase("text")) {
-            String textResp = model.generate(
-                    "prompt: " + reqDto.getPrompt() +
-                            " data: " + JSONArray.fromObject(values).toString() +
-                            " for above prompt give me a detail text response within 120 words by analyzing the data "
-            );
-            System.out.println(textResp);
-            resp.setDashboardType("text");
-            resp.setTextResponse(textResp);
-        } else {
-            if (!values.isEmpty()) {
-                resp.setDashboardColumns(values.get(0).keySet());
+        switch (reqDto.getDashboardType().toLowerCase()) {
+            case "text" -> {
+                String textResp = model.generate(
+                        "prompt: " + reqDto.getPrompt() +
+                                " data: " + JSONArray.fromObject(values).toString() +
+                                " for above prompt give me a detail text response within 120 words by analyzing the data "
+                );
+                System.out.println(textResp);
+                resp.setTextResponse(textResp);
             }
-            resp.setDashboardValues(values);
-            resp.setDashboardType("table");
+            case "table" -> {
+                if (!values.isEmpty()) {
+                    resp.setDashboardColumns(values.get(0).keySet());
+                }
+                resp.setDashboardValues(values);
+            }
+            default -> {
+                // chart
+            }
         }
         return baseResponse.successResponse(resp);
     }
