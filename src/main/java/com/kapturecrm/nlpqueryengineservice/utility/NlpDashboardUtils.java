@@ -28,11 +28,16 @@ public class NlpDashboardUtils {
         entityNameToTableName.put("customer", "cm_lead_member");
         entityNameToTableName.put("customers", "cm_lead_member");
         entityNameToTableName.put("product", "cm_product");
+        entityNameToTableName.put("products", "cm_product");
         entityNameToTableName.put("employee", "cm_employee");
+        entityNameToTableName.put("employees", "cm_employee");
         entityNameToTableName.put("order", "cm_lead_confirmation_detail");
         entityNameToTableName.put("ticket", "cm_general_task");
+        entityNameToTableName.put("tickets", "cm_general_task");
         entityNameToTableName.put("queue", "task_queue_type");
+        entityNameToTableName.put("queues", "task_queue_type");
         entityNameToTableName.put("folder", "task_folder");
+        entityNameToTableName.put("folders", "task_folder");
     }
 
     public record PromptInfo(String prompt, List<String> tableNames) {

@@ -37,6 +37,7 @@ public class NlpDashboardService {
         OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
         String aiReply = model.generate(getPromptForAI(reqDto.getPrompt()));
         String sql = validateAIGeneratedSQL(aiReply);
+        log.info("finalSql: {}", sql);
         List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
 
         NlpDashboardResponse resp = new NlpDashboardResponse();
