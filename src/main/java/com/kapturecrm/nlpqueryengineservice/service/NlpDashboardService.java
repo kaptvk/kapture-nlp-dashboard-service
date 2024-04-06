@@ -57,6 +57,10 @@ public class NlpDashboardService {
                 );
                 System.out.println(textResp);
                 resp.setTextResponse(textResp);
+                if (!values.isEmpty()) {
+                    resp.setDashboardColumns(values.get(0).keySet());
+                }
+                resp.setDashboardValues(values);
             }
             case "table" -> {
                 if (!values.isEmpty()) {
