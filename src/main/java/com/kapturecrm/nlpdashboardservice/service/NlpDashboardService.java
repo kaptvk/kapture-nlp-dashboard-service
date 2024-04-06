@@ -1,6 +1,6 @@
 package com.kapturecrm.nlpdashboardservice.service;
 
-import com.kapturecrm.nlpdashboardservice.Object.NlpDashboardPrompt;
+import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
 import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
@@ -63,7 +63,7 @@ public class NlpDashboardService {
                 case "text" -> {
                     String textResp = model.generate("prompt: " + reqDto.getPrompt() +
                             " data: " + JSONArray.fromObject(values).toString() +
-                            " for above prompt give me a detail text response within 120 words by analyzing the data ");
+                            " for above prompt give me a detail text response in less than 120 words by analyzing the data ");
                     System.out.println(textResp);
                     resp.setTextResponse(textResp);
                 }

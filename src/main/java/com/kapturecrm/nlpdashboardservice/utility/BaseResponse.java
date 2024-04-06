@@ -9,12 +9,20 @@ import java.util.Calendar;
 
 @Service
 public class BaseResponse {
+
     @Data
     public static class ResponseDto {
-        private boolean  status;
-        private Object   data;
-        private String   message;
+        private boolean status;
+        private Object data;
+        private String message;
         private Calendar timestamp = Calendar.getInstance();
+    }
+
+    public ResponseEntity<ResponseDto> successResponse(String msg) {
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setStatus(true);
+        responseDto.setMessage(msg);
+        return ResponseEntity.ok(responseDto);
     }
 
     public ResponseEntity<ResponseDto> successResponse(Object data) {

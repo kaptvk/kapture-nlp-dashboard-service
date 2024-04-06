@@ -1,6 +1,6 @@
 package com.kapturecrm.nlpdashboardservice.service;
 
-import com.kapturecrm.nlpdashboardservice.Object.NlpDashboardPrompt;
+import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
 import com.kapturecrm.nlpdashboardservice.dto.FeedbackDto;
 import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class NlpDashboardPromptService {
 
-    public final HttpServletRequest httpServletRequest;
+    private final HttpServletRequest httpServletRequest;
     private final BaseResponse baseResponse;
     private final MysqlRepo mysqlRepo;
 
