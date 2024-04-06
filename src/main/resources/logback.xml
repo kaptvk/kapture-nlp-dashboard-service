@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<property name="APP_LOG" value="logs/kapture-nlp-dashboard-service.log" />
+	<property name="ANALYTICS_LOG" value="logs/kapture1-nlp-dashboard-service.log" />
+	<property name="DEBUG_LOG" value="logs/kapture2-nlp-dashboard-service.log" />
+
+	<appender name="FILE-ROLLING"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${APP_LOG}</file>
+
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>logs/archived/ticket-customer.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+
+			<maxFileSize>10MB</maxFileSize> <!-- 2 days to keep -->
+			<maxHistory>2</maxHistory> <!-- total size of all archive files, if total size > 500MB, it will delete old archived file -->
+			<totalSizeCap>500MB</totalSizeCap>
+
+		</rollingPolicy>
+
+		<encoder>
+			<pattern>%d [%t] %-5p %logger{0} - %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="ANALYTICS_FILE-ROLLING"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${ANALYTICS_LOG}</file>
+
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>logs/archived/api_dashboard_analytics.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+
+			<maxFileSize>10MB</maxFileSize> <!-- 2 days to keep -->
+			<maxHistory>2</maxHistory> <!-- total size of all archive files, if total size > 500MB, it will delete old archived file -->
+			<totalSizeCap>500MB</totalSizeCap>
+
+		</rollingPolicy>
+
+		<encoder>
+			<pattern>%m%n</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="DEBUG_FILE-ROLLING"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${DEBUG_LOG}</file>
+
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>logs/archived/debug_payload.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+
+			<maxFileSize>10MB</maxFileSize> <!-- 2 days to keep -->
+			<maxHistory>2</maxHistory> <!-- total size of all archive files, if total size > 500MB, it will delete old archived file -->
+			<totalSizeCap>500MB</totalSizeCap>
+
+		</rollingPolicy>
+
+		<encoder>
+			<pattern>%d [%t] %-5p %logger{0} - %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="com.kapture" level="debug" additivity="false">
+		<appender-ref ref="FILE-ROLLING" />
+	</logger>
+	
+	<logger name="analytics_log" level="debug" additivity="false">
+        <appender-ref ref="ANALYTICS_FILE-ROLLING"/>
+    </logger>
+    
+    <logger name="debug_log" level="debug" additivity="false">
+        <appender-ref ref="DEBUG_FILE-ROLLING"/>
+    </logger>
+
+	<root level="error">
+		<appender-ref ref="FILE-ROLLING" />
+	</root>
+
+</configuration>
