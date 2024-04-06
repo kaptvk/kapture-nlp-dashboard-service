@@ -12,10 +12,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ComponentScan(basePackages = {"com.kapturecrm.*", "com.kapture.*"})
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EnableScheduling
-public class NlpQueryEngineServiceApplication {
+public class KaptureNlpDashboardServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(NlpQueryEngineServiceApplication.class, args);
+        SpringApplication.run(KaptureNlpDashboardServiceApplication.class, args);
     }
 
 }
