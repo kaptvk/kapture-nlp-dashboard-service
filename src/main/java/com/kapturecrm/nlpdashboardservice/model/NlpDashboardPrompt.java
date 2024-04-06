@@ -13,15 +13,30 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NlpDashboardPrompt {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "prompt")
     private String prompt;
+
+    @Column(name = "cm_id")
     private int cmId;
+
+    @Column(name = "emp_id")
     private int empId;
+
+    @Column(name = "dashboard_type")
     private String dashboardType;
+
+    @Column(name = "create_time")
     private Timestamp createTime;
+
+    @Column(name = "is_satisfied")
     private Boolean isSatisfied;
+
+    @Column(name = "suggestion")
     private String suggestion;
 
 }

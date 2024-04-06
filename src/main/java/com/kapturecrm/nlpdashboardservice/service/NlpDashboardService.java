@@ -43,28 +43,28 @@ public class NlpDashboardService {
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
         try {
+            NlpDashboardResponse resp = new NlpDashboardResponse();
             PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
             int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
             int empId = partnerUser != null ? partnerUser.getEmpId() : 0;
+
             NlpDashboardPrompt nlpDashboardprompt = new NlpDashboardPrompt();
             setData(nlpDashboardprompt, cmId, empId, reqDto);
-            if (mysqlRepo.addPrompt(nlpDashboardprompt)) {
-                log.info("Prompt added successfully");
-            } else {
-                log.error("Failed to add prompt");
-            }
+
+            Thread promptSaveThread = new Thread(() -> mysqlRepo.addPrompt(nlpDashboardprompt));
+            promptSaveThread.start();
+
             OpenAiChatModel model = OpenAiChatModel.withApiKey(apiKey);
             String aiReply = model.generate(getPromptForAI(cmId, reqDto));
             String sql = validateAIGeneratedSQL(cmId, aiReply);
             log.info("Generated SQL: {}", sql);
             List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
-            NlpDashboardResponse resp = new NlpDashboardResponse();
+
             switch (reqDto.getDashboardType().toLowerCase()) {
                 case "text" -> {
                     String textResp = model.generate("prompt: " + reqDto.getPrompt() +
                             " data: " + JSONArray.fromObject(values).toString() +
                             " for above prompt give me a detail text response in less than 120 words by analyzing the data ");
-                    System.out.println(textResp);
                     resp.setTextResponse(textResp);
                 }
                 case "table" -> {
@@ -72,10 +72,15 @@ public class NlpDashboardService {
                 default -> {
                 }
             }
+
             if (!values.isEmpty()) {
                 resp.setDashboardColumns(values.get(0).keySet());
             }
             resp.setDashboardValues(values);
+
+            promptSaveThread.join();
+            resp.setPromptId(nlpDashboardprompt.getId());
+
             return baseResponse.successResponse(resp);
         } catch (Exception e) {
             log.error("Error in generateNlpDashboard", e);
