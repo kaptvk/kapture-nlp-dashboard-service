@@ -57,21 +57,16 @@ public class NlpDashboardService {
                 );
                 System.out.println(textResp);
                 resp.setTextResponse(textResp);
-                if (!values.isEmpty()) {
-                    resp.setDashboardColumns(values.get(0).keySet());
-                }
-                resp.setDashboardValues(values);
             }
             case "table" -> {
-                if (!values.isEmpty()) {
-                    resp.setDashboardColumns(values.get(0).keySet());
-                }
-                resp.setDashboardValues(values);
             }
             default -> {
-                // chart
             }
         }
+        if (!values.isEmpty()) {
+            resp.setDashboardColumns(values.get(0).keySet());
+        }
+        resp.setDashboardValues(values);
         return baseResponse.successResponse(resp);
     }
 
@@ -89,7 +84,16 @@ public class NlpDashboardService {
     }
 
     private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
-        String prompt = "give ClickHouse sql query with less than 15 essential columns and exclude columns: id, cm_id and include cm_id = " + cmId + " in where clause";
+        String prompt = "Give ClickHouse sql query with correct syntax";
+        if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
+            prompt += " with less than 15 essential columns";
+        } else {
+            prompt += " with required columns for making " + reqDto.getDashboardType() +
+                    ", adding any alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
+                    " column used for alias value should be a number datatype";
+        }
+        prompt += " and exclude selecting columns: id, cm_id";
+        prompt += "\nand include cm_id = " + cmId + " in where clause";
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
         prompt += "\nfor prompt: " + promptInfo.prompt();
@@ -97,7 +101,7 @@ public class NlpDashboardService {
             prompt += "\nin date range: " + getTimestampForSql(reqDto.getStartDate()) + " to " + getTimestampForSql(reqDto.getEndDate());
         }
         prompt += "\nfor tables schema: " + dbSchema;
-        //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo R&D on its usage
+        //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo
         return prompt;
     }
 

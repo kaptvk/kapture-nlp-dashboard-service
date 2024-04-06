@@ -23,6 +23,7 @@ public class NlpDashboardUtils {
     private final NlpDashboardRepository nlpDashboardRepo;
 
     private static final Map<String, String> entityNameToTableName = new HashMap<>();
+    private static final Map<String, String> chartTypeToAlias = new HashMap<>();
 
     static {
         entityNameToTableName.put("customer", "cm_lead_member");
@@ -38,6 +39,17 @@ public class NlpDashboardUtils {
         entityNameToTableName.put("queues", "task_queue_type");
         entityNameToTableName.put("folder", "task_folder");
         entityNameToTableName.put("folders", "task_folder");
+    }
+
+    static {
+        chartTypeToAlias.put("barchart", "name,value");
+        chartTypeToAlias.put("number", "name,value");
+        chartTypeToAlias.put("donut", "type,value");
+        chartTypeToAlias.put("common", "name,type,value");
+    }
+
+    public static String getAliasForChart(String chartType) {
+        return chartTypeToAlias.getOrDefault(chartType, chartTypeToAlias.get("common"));
     }
 
     public record PromptInfo(String prompt, List<String> tableNames) {

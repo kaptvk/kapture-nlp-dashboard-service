@@ -13,7 +13,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @Slf4j
@@ -55,9 +54,9 @@ public class NlpDashboardRepository {
     }
 
     public void getDatabaseTableSchema(String tableName, JSONObject dbSchema) {
-        Optional<String> tableSchema = tableNameToSchemaCache.get(tableName);
-        if (tableSchema.isPresent()) {
-            dbSchema.put(tableName, tableSchema.get());
+        String tableSchema = tableNameToSchemaCache.get(tableName);
+        if (tableSchema != null) {
+            dbSchema.put(tableName, tableSchema);
             return;
         }
         Connection conn = null;

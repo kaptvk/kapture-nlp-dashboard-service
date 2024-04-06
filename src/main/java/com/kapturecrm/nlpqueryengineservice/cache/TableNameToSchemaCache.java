@@ -7,8 +7,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
@@ -27,13 +25,13 @@ public class TableNameToSchemaCache {
         }
     }
 
-    public Optional<String> get(String tableName) {
+    public String get(String tableName) {
         try {
             RMap<String, String> map = redissonClient.getMap(TABLE_NAME_TO_SCHEMA_MAP);
-            return Optional.of(map.get(tableName));
+            return map.get(tableName);
         } catch (Exception e) {
             log.error("Error in getTableSchema" + e);
-            return Optional.empty();
+            return null;
         }
     }
 
