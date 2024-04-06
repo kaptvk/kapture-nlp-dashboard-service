@@ -64,11 +64,9 @@ public class NlpDashboardRepository {
         ResultSet rs = null;
         try {
             conn = ClickHouseConnUtil.getConnection();
-            if (conn != null) {
-                String dbName = conn.getCatalog();
-                DatabaseMetaData metaData = conn.getMetaData();
-                rs = metaData.getColumns(dbName, null, tableName, null);
-            }
+            String dbName = conn.getCatalog();
+            DatabaseMetaData metaData = conn.getMetaData();
+            rs = metaData.getColumns(dbName, null, tableName, null);
         } catch (Exception e) {
             log.error("Error in getDatabaseSchema", e);
         } finally {
