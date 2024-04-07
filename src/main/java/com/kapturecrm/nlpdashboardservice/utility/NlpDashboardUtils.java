@@ -30,11 +30,12 @@ public class NlpDashboardUtils {
         entityNameToTableName.put("customers", "cm_lead_member");
         entityNameToTableName.put("contact", "cm_contact_details");
         entityNameToTableName.put("contacts", "cm_contact_details");
-        entityNameToTableName.put("product", "cm_product");
-        entityNameToTableName.put("products", "cm_product");
+        entityNameToTableName.put("product", "cm_lead_product");
+        entityNameToTableName.put("products", "cm_lead_product");
         entityNameToTableName.put("employee", "cm_employee");
         entityNameToTableName.put("employees", "cm_employee");
         entityNameToTableName.put("order", "cm_lead_confirmation_detail");
+        entityNameToTableName.put("orders", "cm_lead_confirmation_detail");
         entityNameToTableName.put("ticket", "cm_general_task");
         entityNameToTableName.put("tickets", "cm_general_task");
         entityNameToTableName.put("queue", "task_queue_type");
@@ -68,7 +69,7 @@ public class NlpDashboardUtils {
             for (String key : prompt.split(" ")) {
                 if (entityNameToTableName.containsKey(key)) {
                     String tableName = entityNameToTableName.get(key);
-                    if("cm_lead_member,cm_lead_product,cm_employee".contains(tableName)) {
+                    if ("cm_lead_member,cm_lead_product,cm_employee".contains(tableName)) {
                         futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema("cm_additional_fields_mapping", dbSchema)));
                         futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema("cm_additional_fields", dbSchema)));
                     }
