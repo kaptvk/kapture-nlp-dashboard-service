@@ -18,14 +18,14 @@ public class BaseResponse {
         private Calendar timestamp = Calendar.getInstance();
     }
 
-    public ResponseEntity<ResponseDto> successResponse(String msg) {
+    public static ResponseEntity<ResponseDto> success(String msg) {
         ResponseDto responseDto = new ResponseDto();
         responseDto.setStatus(true);
         responseDto.setMessage(msg);
         return ResponseEntity.ok(responseDto);
     }
 
-    public ResponseEntity<ResponseDto> successResponse(Object data) {
+    public static ResponseEntity<ResponseDto> success(Object data) {
         ResponseDto responseDto = new ResponseDto();
         responseDto.setStatus(true);
         responseDto.setData(data);
@@ -33,7 +33,7 @@ public class BaseResponse {
         return ResponseEntity.ok(responseDto);
     }
 
-    public ResponseEntity<ResponseDto> successResponse(Object data, String message) {
+    public static ResponseEntity<ResponseDto> success(Object data, String message) {
         ResponseDto responseDto = new ResponseDto();
         responseDto.setStatus(true);
         responseDto.setData(data);
@@ -41,14 +41,14 @@ public class BaseResponse {
         return ResponseEntity.ok(responseDto);
     }
 
-    public ResponseEntity<ResponseDto> errorResponse(Exception e) {
+    public static ResponseEntity<ResponseDto> error(Exception e) {
         ResponseDto responseDto = new ResponseDto();
         responseDto.setMessage("Something went wrong!");
         responseDto.setData(e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
     }
 
-    public ResponseEntity<ResponseDto> errorResponse(HttpStatus httpStatus, String message) {
+    public static ResponseEntity<ResponseDto> error(HttpStatus httpStatus, String message) {
         ResponseDto responseDto = new ResponseDto();
         responseDto.setMessage(message);
         return ResponseEntity.status(httpStatus).body(responseDto);

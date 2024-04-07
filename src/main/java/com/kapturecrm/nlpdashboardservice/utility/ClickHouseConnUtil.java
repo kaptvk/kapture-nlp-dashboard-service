@@ -32,6 +32,7 @@ public class ClickHouseConnUtil {
             return DriverManager.getConnection(dbUrl, user, password);
         } catch (Exception e) {
             logger.error("Error clickhouse getConnection: ", e);
+            System.out.println("Clickhouse Connection Error");
         }
         return null;
     }

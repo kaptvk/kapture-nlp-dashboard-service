@@ -1,7 +1,7 @@
 package com.kapturecrm.nlpdashboardservice.service;
 
-import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
 import com.kapturecrm.nlpdashboardservice.dto.FeedbackDto;
+import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
 import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
 import com.kapturecrm.object.PartnerUser;
@@ -35,16 +35,16 @@ public class NlpDashboardPromptService {
                     nlpDashboardPrompt.setFeedback(feedbackDto.getFeedback());
                 }
                 if (mysqlRepo.addPrompt(nlpDashboardPrompt)) {
-                    return baseResponse.successResponse("Feedback updated successfully.");
+                    return BaseResponse.success("Feedback updated successfully.");
                 } else {
-                    return baseResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update feedback.");
+                    return BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update feedback.");
                 }
             } else {
-                return baseResponse.errorResponse(HttpStatus.BAD_REQUEST, "Feedback data is null.");
+                return BaseResponse.error(HttpStatus.BAD_REQUEST, "Feedback data is null.");
             }
         } catch (Exception e) {
             log.error("Error in updateFeedback", e);
-            return baseResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
+            return BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
         }
     }
 
@@ -55,10 +55,10 @@ public class NlpDashboardPromptService {
             int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
             int empId = partnerUser != null ? partnerUser.getEmpId() : 0;
             List<NlpDashboardPrompt> prompts = mysqlRepo.getRecentPrompts(cmId, empId);
-            return baseResponse.successResponse(prompts);
+            return BaseResponse.success(prompts);
         } catch (Exception e) {
             log.error("Error in getPrompt", e);
-            return baseResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
+            return BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
         }
     }
 

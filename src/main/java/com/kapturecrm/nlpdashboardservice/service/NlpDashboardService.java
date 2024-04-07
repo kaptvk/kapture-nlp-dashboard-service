@@ -39,7 +39,6 @@ public class NlpDashboardService {
     private final NlpDashboardRepository nlpDashboardRepository;
     private final NlpDashboardUtils nlpDashboardUtils;
     private final HttpServletRequest httpServletRequest;
-    private final BaseResponse baseResponse;
     private final MysqlRepo mysqlRepo;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
@@ -82,13 +81,13 @@ public class NlpDashboardService {
             promptSaveThread.join();
             resp.setPromptId(nlpDashboardprompt.getId());
 
-            return baseResponse.successResponse(resp);
+            return BaseResponse.success(resp);
         } catch (KaptureException ke) {
             log.warn("Error in generateNlpDashboard" + ke.getBaseResponse());
             return ke.getBaseResponse();
         } catch (Exception e) {
             log.error("Error in generateNlpDashboard", e);
-            return baseResponse.errorResponse(e);
+            return BaseResponse.error(e);
         }
     }
 
@@ -105,7 +104,7 @@ public class NlpDashboardService {
         // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
         String sql = aiReply.replaceAll("[\n;]", " ");
         if (!(sql.startsWith("SELECT") || sql.startsWith("select"))) {
-            throw new KaptureException(baseResponse.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, "Only select operation supported!"));
+            throw new KaptureException(BaseResponse.error(HttpStatus.UNPROCESSABLE_ENTITY, "Only select operation supported!"));
         }
         if (!(sql.contains("WHERE") || sql.contains("where"))) {
             sql += " where cm_id = " + cmId;
@@ -120,25 +119,26 @@ public class NlpDashboardService {
     }
 
     private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
-        String prompt = "Give ClickHouse sql query with correct syntax";
+        String prompt = "Give ClickHouse sql query with correct syntax based on tables schema, prompt, and date range specified\n";
         if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
-            prompt += " with less than 15 essential columns";
+            prompt += " select less than 15 essential columns";
         } else {
-            prompt += " with required columns for making " + reqDto.getDashboardType() +
+            prompt += " select required columns for making " + reqDto.getDashboardType() +
                     ", adding any alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
-                    " column used for alias `value` must be a number datatype and type will be the meaningful name of the column used for alias `value`" +
+                    " column used for alias `value` must be a number datatype and type will be a meaningful name of the column used for alias `value`" +
                     " also there can be multiple different type, hence value can be calculated based on type";
         }
-        prompt += " and ignore selecting columns: id, cm_id and foreign key id";
-        prompt += "\nand include cm_id = " + cmId + " in where clause";
+        prompt += "\nignore selecting columns like id, cm_id and foreign key id";
+        prompt += "\nand include cm_id = " + cmId + " in where clause condition";
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
-        prompt += "\nfor prompt: " + promptInfo.prompt();
+        prompt += "\n\nPROMPT: " + promptInfo.prompt();
         if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) {
-            prompt += "\nin date range: " + getTimestampForSql(reqDto.getStartDate()) + " to " + getTimestampForSql(reqDto.getEndDate());
+            prompt += "\nDATE RANGE: " + getTimestampForSql(reqDto.getStartDate()) + " to " + getTimestampForSql(reqDto.getEndDate());
         }
-        prompt += "\nfor tables schema: " + dbSchema;
+        prompt += "\nDB TABLES SCHEMA: " + dbSchema;
         //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo
+        //todo prefer sub query over join when table count more than 1
         return prompt;
     }
 
