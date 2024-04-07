@@ -2,11 +2,14 @@ package com.kapturecrm.nlpdashboardservice.repository;
 
 
 import com.kapturecrm.nlpdashboardservice.cache.TableNameToSchemaCache;
+import com.kapturecrm.nlpdashboardservice.exception.KaptureException;
+import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
 import com.kapturecrm.nlpdashboardservice.utility.ClickHouseConnUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -25,7 +28,7 @@ public class NlpDashboardRepository {
 
     private final TableNameToSchemaCache tableNameToSchemaCache;
 
-    public List<LinkedHashMap<String, Object>> findNlpDashboardDataFromSql(String sql) {
+    public List<LinkedHashMap<String, Object>> findNlpDashboardDataFromSql(String sql) throws KaptureException {
         List<LinkedHashMap<String, Object>> resp = new ArrayList<>();
         Connection conn = null;
         try {
@@ -45,6 +48,7 @@ public class NlpDashboardRepository {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("Error in findNlpDashboardDataFromSql", e);
+            throw new KaptureException(BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "AI generated incorrect SQL"));
         } finally {
             ClickHouseConnUtil.closeConn(conn);
         }

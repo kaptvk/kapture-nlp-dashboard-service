@@ -99,7 +99,7 @@ public class NlpDashboardService {
     private String validateAIGeneratedSQL(int cmId, String aiReply) throws KaptureException {
         // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
         String sql = aiReply.replaceAll("[\n;]", " ");
-        if (!(sql.startsWith("SELECT") || sql.startsWith("select"))) {
+        if (!(sql.trim().startsWith("SELECT") || sql.trim().startsWith("select"))) {
             throw new KaptureException(BaseResponse.error(HttpStatus.UNPROCESSABLE_ENTITY, "Only select operation supported!"));
         }
         if (!(sql.contains("WHERE") || sql.contains("where"))) {
@@ -117,32 +117,39 @@ public class NlpDashboardService {
     private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
         StringBuilder promptBuilder = new StringBuilder();
 
+        JSONObject dbSchema = new JSONObject();
+        NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
+        promptBuilder.append("\nPROMPT: ").append(promptInfo.prompt());
+        promptBuilder.append("\nDATABASE TABLES SCHEMA (tableName to columnName to columnDataType config): ").append(dbSchema);
+        if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) {
+            promptBuilder.append("\nDATE RANGE: ").append(getTimestampForSql(reqDto.getStartDate()))
+                    .append(" to ").append(getTimestampForSql(reqDto.getEndDate()));
+        }
         // Initial prompt instructions
-        promptBuilder.append("Provide a ClickHouse SQL query with correct syntax and column names based on the table schema and prompt, ready to execute directly in ClickHouse.\n");
+        promptBuilder.append("\nProvide a ClickHouse SQL query for PROMPT with correct syntax and proper table column names mentioned in DATABASE TABLES SCHEMA, to execute directly in ClickHouse.\n");
 
         // Conditionally add instructions based on dashboard type
         if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
             promptBuilder.append("Select fewer than 15 essential columns.");
         } else {
-            promptBuilder.append("Select the required columns for creating a ")
-                    .append(reqDto.getDashboardType())
-                    .append(" visualization. Add alias names (e.g., `column_name as alias`). The column used for the alias 'value' must be of numeric datatype. Multiple types may exist, so the 'value' can be calculated accordingly.\n");
+            promptBuilder.append(
+                    " select required columns for making " + reqDto.getDashboardType() +
+                            ", adding alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
+                            " column used for alias `value` must be a numeric datatype and type will be a meaningful name of the column used for alias `value`" +
+                            " also there can be multiple different type, hence value can be calculated based on type (like count of occurrence)"
+            );
+            promptBuilder.append("\nEnsure sql logic is like `SELECT {column1_name} AS name, countIf({column2 condition}) AS value, 'count of the {column2 condition}' AS type FROM table_name group by {column2_name}` ");
+//            promptBuilder.append(" for creating a ").append(reqDto.getDashboardType()).append(" visualization.")
+//                    .append("\nsample query logic: `SELECT $column1 AS 'name', COUNTIF(some condition) AS 'value', 'count of the condition' AS 'type' FROM table_name group by $column2`")
+//                    .append("\nupdate column1, column2, condition  in sample query with appropriate column names from table");
         }
 
         // Common instructions
-        promptBuilder.append("\nExclude columns like 'id', 'cm_id', and foreign key columns.");
+        promptBuilder.append("\nEnsure column names used are available in the DATABASE TABLES SCHEMA.");
+        promptBuilder.append("\nExclude selecting columns like 'id', 'cm_id', and foreign key columns.");
         promptBuilder.append("\nInclude 'cm_id = ").append(cmId).append("' in the WHERE clause condition.");
-
-        // Additional information
-        JSONObject dbSchema = new JSONObject();
-        NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
-        promptBuilder.append("\n\nPROMPT: ").append(promptInfo.prompt());
-        if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) {
-            promptBuilder.append("\nDATE RANGE: ").append(getTimestampForSql(reqDto.getStartDate()))
-                    .append(" to ").append(getTimestampForSql(reqDto.getEndDate()));
-        }
-        promptBuilder.append("\nDB TABLES SCHEMA: ").append(dbSchema);
 
         return promptBuilder.toString();
     }
+
 }
