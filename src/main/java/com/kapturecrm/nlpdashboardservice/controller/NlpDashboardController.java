@@ -30,7 +30,7 @@ public class NlpDashboardController {
 
     @GetMapping("/get-recent-prompts")
     public ResponseEntity<?> getPrompt() {
-        return nlpDashboardPromptService.getPrompt();
+        return nlpDashboardPromptService.getRecentPrompts();
     }
 
 }

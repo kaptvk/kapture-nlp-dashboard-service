@@ -49,17 +49,13 @@ public class NlpDashboardPromptService {
     }
 
 
-    public ResponseEntity<?> getPrompt() {
+    public ResponseEntity<?> getRecentPrompts() {
         try {
             PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
             int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
             int empId = partnerUser != null ? partnerUser.getEmpId() : 0;
-            List<NlpDashboardPrompt> nlpDashboardPrompt = mysqlRepo.getPrompt(cmId, empId);
-            if (!nlpDashboardPrompt.isEmpty()) {
-                return baseResponse.successResponse(nlpDashboardPrompt);
-            } else {
-                return baseResponse.errorResponse(HttpStatus.NOT_FOUND, "Prompt not found");
-            }
+            List<NlpDashboardPrompt> prompts = mysqlRepo.getRecentPrompts(cmId, empId);
+            return baseResponse.successResponse(prompts);
         } catch (Exception e) {
             log.error("Error in getPrompt", e);
             return baseResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
