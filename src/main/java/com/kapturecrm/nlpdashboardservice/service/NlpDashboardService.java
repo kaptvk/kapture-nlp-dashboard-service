@@ -56,9 +56,10 @@ public class NlpDashboardService {
 
             OpenAiChatModel openAiModel = OpenAiChatModel.withApiKey(apiKey);
             String aiReply = openAiModel.generate(getPromptForAI(cmId, reqDto));
-            String sql = validateAIGeneratedSQL(cmId, aiReply);
-            log.info("FINAL-NLP-SQL: {}", sql);
-            List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(sql);
+            String finalSql = validateAIGeneratedSQL(cmId, aiReply);
+            log.info("FINAL-NLP-SQL: {}", finalSql);
+            System.out.println(finalSql);
+            List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(finalSql);
 
             switch (reqDto.getDashboardType().toLowerCase()) {
                 case "text" -> {
@@ -119,14 +120,14 @@ public class NlpDashboardService {
     private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
         String prompt = "Give ClickHouse sql query with correct syntax";
         if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
-            prompt += " with less than 15 essential columns";
+            prompt += " with less than 15 essential columns and with limit 10000";
         } else {
             prompt += " with required columns for making " + reqDto.getDashboardType() +
                     ", adding any alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
                     " column used for alias `value` must be a number datatype and type will be the meaningful name of the column used for alias `value`" +
                     " also there can be multiple different type, hence value can be calculated based on type";
         }
-        prompt += " and exclude selecting columns: id, cm_id and foreign key id";
+        prompt += " and ignore selecting columns: id, cm_id and foreign key id";
         prompt += "\nand include cm_id = " + cmId + " in where clause";
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
