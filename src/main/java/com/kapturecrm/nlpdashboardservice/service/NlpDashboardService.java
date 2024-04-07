@@ -109,7 +109,7 @@ public class NlpDashboardService {
             sql = sql.replace("where", "where cm_id = " + cmId + " and ");
         }
         if (!(sql.contains("LIMIT") || sql.contains("limit"))) {
-            sql += " LIMIT 10000";
+            sql += " LIMIT 1000";
         }
         return sql;
     }

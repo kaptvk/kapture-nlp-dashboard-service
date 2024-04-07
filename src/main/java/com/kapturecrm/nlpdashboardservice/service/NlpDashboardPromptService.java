@@ -51,8 +51,8 @@ public class NlpDashboardPromptService {
     public ResponseEntity<?> getRecentPrompts() {
         try {
             PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
-            int cmId = partnerUser != null ? partnerUser.getCmId() : 0;
-            int empId = partnerUser != null ? partnerUser.getEmpId() : 0;
+            int cmId = partnerUser != null ? partnerUser.getCmId() : 415;
+            int empId = partnerUser != null ? partnerUser.getEmpId() : 415;
             List<NlpDashboardPrompt> prompts = mysqlRepo.getRecentPrompts(cmId, empId);
             return BaseResponse.success(prompts);
         } catch (Exception e) {
