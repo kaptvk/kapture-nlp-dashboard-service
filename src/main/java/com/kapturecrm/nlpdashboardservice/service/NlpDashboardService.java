@@ -87,7 +87,7 @@ public class NlpDashboardService {
             return ke.getBaseResponse();
         } catch (Exception e) {
             log.error("Error in generateNlpDashboard", e);
-            return baseResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
+            return baseResponse.errorResponse(e);
         }
     }
 
@@ -126,7 +126,7 @@ public class NlpDashboardService {
                     " column used for alias `value` must be a number datatype and type will be the meaningful name of the column used for alias `value`" +
                     " also there can be multiple different type, hence value can be calculated based on type";
         }
-        prompt += " and exclude selecting columns: id, cm_id";
+        prompt += " and exclude selecting columns: id, cm_id and foreign key id";
         prompt += "\nand include cm_id = " + cmId + " in where clause";
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
