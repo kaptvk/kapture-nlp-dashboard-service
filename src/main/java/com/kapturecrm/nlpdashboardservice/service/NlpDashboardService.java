@@ -119,7 +119,7 @@ public class NlpDashboardService {
     }
 
     private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
-        String prompt = "Give ClickHouse sql query with correct syntax based on tables schema, prompt, and date range specified\n";
+        String prompt = "Give ClickHouse sql query with correct syntax and correct column names based on tables schema, prompt, and date range specified\n";
         if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
             prompt += " select less than 15 essential columns";
         } else {
