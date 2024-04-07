@@ -74,7 +74,7 @@ public class NlpDashboardUtils {
                     }
                     futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema(tableName, dbSchema)));
                     tableNames.add(tableName);
-                    int index = modifiedPrompt.indexOf(key);
+                    int index = prompt.indexOf(key);
                     modifiedPrompt.replace(index, index + key.length(), tableName);
                 }
             }
