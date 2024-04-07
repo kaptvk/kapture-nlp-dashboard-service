@@ -1,10 +1,12 @@
 package com.kapturecrm.nlpdashboardservice.utility;
 
+import com.kapturecrm.nlpdashboardservice.exception.KaptureException;
 import com.kapturecrm.nlpdashboardservice.repository.NlpDashboardRepository;
 import lombok.RequiredArgsConstructor;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -60,14 +62,16 @@ public class NlpDashboardUtils {
 
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
-    public PromptInfo convertTableNameAndFindDBSchema(String prompt, JSONObject dbSchema) {
+    public PromptInfo convertTableNameAndFindDBSchema(String prompt, JSONObject dbSchema) throws KaptureException {
         List<String> tableNames = new ArrayList<>();
         StringBuilder modifiedPrompt = new StringBuilder(prompt);
         if (StringUtils.isNotBlank(prompt)) {
             prompt = prompt.toLowerCase();
             List<Future<?>> futures = new ArrayList<>();
+            int tableCount = 0;
             for (String key : prompt.split(" ")) {
                 if (entityNameToTableName.containsKey(key)) {
+                    tableCount++;
                     String tableName = entityNameToTableName.get(key);
                     if ("cm_lead_member,cm_lead_product,cm_employee".contains(tableName)) {
                         futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema("cm_additional_fields_mapping", dbSchema)));
@@ -78,6 +82,9 @@ public class NlpDashboardUtils {
                     int index = prompt.indexOf(key);
                     modifiedPrompt.replace(index, index + key.length(), tableName);
                 }
+            }
+            if (tableCount == 0) {
+                throw new KaptureException(BaseResponse.error(HttpStatus.UNPROCESSABLE_ENTITY, "Could not process the prompt!"));
             }
             waitForCompletion(futures);
         }

@@ -114,7 +114,7 @@ public class NlpDashboardService {
         return sql;
     }
 
-    private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
+    private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) throws KaptureException {
         StringBuilder promptBuilder = new StringBuilder();
 
         JSONObject dbSchema = new JSONObject();
