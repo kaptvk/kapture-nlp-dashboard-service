@@ -67,10 +67,6 @@ public class NlpDashboardService {
                             " for above prompt give me a detail text response in less than 120 words by analyzing the data ");
                     resp.setTextResponse(textResp);
                 }
-                case "table" -> {
-                }
-                default -> {
-                }
             }
 
             if (!values.isEmpty()) {
@@ -119,27 +115,34 @@ public class NlpDashboardService {
     }
 
     private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
-        String prompt = "Give ClickHouse sql query with correct syntax and correct column names based on tables schema, prompt, and date range specified\n";
+        StringBuilder promptBuilder = new StringBuilder();
+
+        // Initial prompt instructions
+        promptBuilder.append("Provide a ClickHouse SQL query with correct syntax and column names based on the table schema and prompt, ready to execute directly in ClickHouse.\n");
+
+        // Conditionally add instructions based on dashboard type
         if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
-            prompt += " select less than 15 essential columns";
+            promptBuilder.append("Select fewer than 15 essential columns.");
         } else {
-            prompt += " select required columns for making " + reqDto.getDashboardType() +
-                    ", adding any alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
-                    " column used for alias `value` must be a number datatype and type will be a meaningful name of the column used for alias `value`" +
-                    " also there can be multiple different type, hence value can be calculated based on type";
+            promptBuilder.append("Select the required columns for creating a ")
+                    .append(reqDto.getDashboardType())
+                    .append(" visualization. Add alias names (e.g., `column_name as alias`). The column used for the alias 'value' must be of numeric datatype. Multiple types may exist, so the 'value' can be calculated accordingly.\n");
         }
-        prompt += "\nignore selecting columns like id, cm_id and foreign key id";
-        prompt += "\nand include cm_id = " + cmId + " in where clause condition";
+
+        // Common instructions
+        promptBuilder.append("\nExclude columns like 'id', 'cm_id', and foreign key columns.");
+        promptBuilder.append("\nInclude 'cm_id = ").append(cmId).append("' in the WHERE clause condition.");
+
+        // Additional information
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
-        prompt += "\n\nPROMPT: " + promptInfo.prompt();
+        promptBuilder.append("\n\nPROMPT: ").append(promptInfo.prompt());
         if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) {
-            prompt += "\nDATE RANGE: " + getTimestampForSql(reqDto.getStartDate()) + " to " + getTimestampForSql(reqDto.getEndDate());
+            promptBuilder.append("\nDATE RANGE: ").append(getTimestampForSql(reqDto.getStartDate()))
+                    .append(" to ").append(getTimestampForSql(reqDto.getEndDate()));
         }
-        prompt += "\nDB TABLES SCHEMA: " + dbSchema;
-        //PromptTemplate promptTemplate = new PromptTemplate(prompt); todo
-        //todo prefer sub query over join when table count more than 1
-        return prompt;
-    }
+        promptBuilder.append("\nDB TABLES SCHEMA: ").append(dbSchema);
 
+        return promptBuilder.toString();
+    }
 }

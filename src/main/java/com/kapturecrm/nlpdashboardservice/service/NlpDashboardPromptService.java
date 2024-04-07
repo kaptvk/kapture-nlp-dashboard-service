@@ -22,7 +22,6 @@ import java.util.List;
 public class NlpDashboardPromptService {
 
     private final HttpServletRequest httpServletRequest;
-    private final BaseResponse baseResponse;
     private final MysqlRepo mysqlRepo;
 
     public ResponseEntity<?> updateFeedback(FeedbackDto feedbackDto) {
