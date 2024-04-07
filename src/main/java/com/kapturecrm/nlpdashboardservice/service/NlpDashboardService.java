@@ -113,14 +113,16 @@ public class NlpDashboardService {
                 || sql.contains("where") && sql.split(" where ")[1].contains("cm_id")) {
             sql = sql.replace("where", "where cm_id = " + cmId + " and ");
         }
-        // todo if date where clause is not present then add limit 1000
+        if (!(sql.contains("LIMIT") || sql.contains("limit"))) {
+            sql += " LIMIT 10000";
+        }
         return sql;
     }
 
     private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) {
         String prompt = "Give ClickHouse sql query with correct syntax";
         if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
-            prompt += " with less than 15 essential columns and with limit 10000";
+            prompt += " with less than 15 essential columns";
         } else {
             prompt += " with required columns for making " + reqDto.getDashboardType() +
                     ", adding any alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
