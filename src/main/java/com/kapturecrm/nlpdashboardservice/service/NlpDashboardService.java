@@ -42,6 +42,7 @@ public class NlpDashboardService {
     private final MysqlRepo mysqlRepo;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
+        String finalPrompt = "";
         try {
             NlpDashboardResponse resp = new NlpDashboardResponse();
             PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
@@ -54,7 +55,8 @@ public class NlpDashboardService {
             promptSaveThread.start();
 
             OpenAiChatModel openAiModel = OpenAiChatModel.withApiKey(apiKey);
-            String aiReply = openAiModel.generate(getPromptForAI(cmId, reqDto));
+            finalPrompt = getPromptForAI(cmId, reqDto);
+            String aiReply = openAiModel.generate(finalPrompt);
             String finalSql = validateAIGeneratedSQL(cmId, aiReply);
             log.info("FINAL-NLP-SQL: {}", finalSql);
             System.out.println(finalSql);
@@ -82,6 +84,8 @@ public class NlpDashboardService {
             log.warn("Error in generateNlpDashboard" + ke.getBaseResponse());
             return ke.getBaseResponse();
         } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(finalPrompt);
             log.error("Error in generateNlpDashboard", e);
             return BaseResponse.error(e);
         }
@@ -120,13 +124,13 @@ public class NlpDashboardService {
         JSONObject dbSchema = new JSONObject();
         NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
         promptBuilder.append("\nPROMPT: ").append(promptInfo.prompt());
-        promptBuilder.append("\nDATABASE TABLES SCHEMA (tableName to columnName to columnDataType config): ").append(dbSchema);
+        promptBuilder.append("\nDATABASE SCHEMA (tableName to columnName to columnDataType mapping): ").append(dbSchema);
         if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) {
             promptBuilder.append("\nDATE RANGE: ").append(getTimestampForSql(reqDto.getStartDate()))
                     .append(" to ").append(getTimestampForSql(reqDto.getEndDate()));
         }
         // Initial prompt instructions
-        promptBuilder.append("\nProvide a ClickHouse SQL query for PROMPT with correct syntax and proper table column names mentioned in DATABASE TABLES SCHEMA, to execute directly in ClickHouse.\n");
+        promptBuilder.append("\nProvide a ClickHouse SQL query for PROMPT with correct syntax and proper table column names mentioned in DATABASE SCHEMA, to execute directly in ClickHouse.\n");
 
         // Conditionally add instructions based on dashboard type
         if (reqDto.getDashboardType().equalsIgnoreCase("table") || reqDto.getDashboardType().equalsIgnoreCase("text")) {
@@ -145,7 +149,7 @@ public class NlpDashboardService {
         }
 
         // Common instructions
-        promptBuilder.append("\nEnsure column names used are available in the DATABASE TABLES SCHEMA.");
+        promptBuilder.append("\nEnsure column names used are available in the DATABASE SCHEMA.");
         promptBuilder.append("\nExclude selecting columns like 'id', 'cm_id', and foreign key columns.");
         promptBuilder.append("\nInclude 'cm_id = ").append(cmId).append("' in the WHERE clause condition.");
 
