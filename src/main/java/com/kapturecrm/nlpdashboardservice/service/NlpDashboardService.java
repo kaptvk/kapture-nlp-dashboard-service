@@ -50,7 +50,7 @@ public class NlpDashboardService {
             int empId = partnerUser != null ? partnerUser.getEmpId() : 415;
 
             NlpDashboardPrompt nlpDashboardprompt = new NlpDashboardPrompt();
-            setData(nlpDashboardprompt, cmId, empId, reqDto);
+            setPromptData(nlpDashboardprompt, cmId, empId, reqDto);
             Thread promptSaveThread = new Thread(() -> mysqlRepo.addPrompt(nlpDashboardprompt));
             promptSaveThread.start();
 
@@ -58,17 +58,17 @@ public class NlpDashboardService {
             finalPrompt = getPromptForAI(cmId, reqDto);
             String aiReply = openAiModel.generate(finalPrompt);
             String finalSql = validateAIGeneratedSQL(cmId, aiReply);
+
             log.info("FINAL-NLP-SQL: {}", finalSql);
             System.out.println(finalSql);
+
             List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(finalSql);
 
-            switch (reqDto.getDashboardType().toLowerCase()) {
-                case "text" -> {
-                    String textResp = openAiModel.generate("prompt: " + reqDto.getPrompt() +
-                            " data: " + JSONArray.fromObject(values).toString() +
-                            " for above prompt give me a detail text response in less than 120 words by analyzing the data ");
-                    resp.setTextResponse(textResp);
-                }
+            if (reqDto.getDashboardType().equalsIgnoreCase("text")) {
+                String textResp = openAiModel.generate("prompt: " + reqDto.getPrompt() +
+                        " data: " + JSONArray.fromObject(values).toString() +
+                        " for above prompt give me a detail text response in less than 120 words by analyzing the data ");
+                resp.setTextResponse(textResp);
             }
 
             if (!values.isEmpty()) {
@@ -91,7 +91,7 @@ public class NlpDashboardService {
         }
     }
 
-    private void setData(NlpDashboardPrompt nlpDashboardprompt, int cmId, int empId, NlpDashboardReqDto reqDto) {
+    private void setPromptData(NlpDashboardPrompt nlpDashboardprompt, int cmId, int empId, NlpDashboardReqDto reqDto) {
         nlpDashboardprompt.setCmId(cmId);
         nlpDashboardprompt.setPrompt(reqDto.getPrompt());
         nlpDashboardprompt.setCreateTime(CommonUtils.getCurrentTimestamp());
@@ -101,7 +101,7 @@ public class NlpDashboardService {
 
 
     private String validateAIGeneratedSQL(int cmId, String aiReply) throws KaptureException {
-        // todo validate reply if it has only sql its fine, else filter out sql alone check for ``` or ```sql
+        // todo validate reply, check for ``` or ```sql
         String sql = aiReply.replaceAll("[\n;]", " ");
         if (!(sql.trim().startsWith("SELECT") || sql.trim().startsWith("select"))) {
             throw new KaptureException(BaseResponse.error(HttpStatus.UNPROCESSABLE_ENTITY, "Only select operation supported!"));
@@ -113,7 +113,7 @@ public class NlpDashboardService {
             sql = sql.replace("where", "where cm_id = " + cmId + " and ");
         }
         if (!(sql.contains("LIMIT") || sql.contains("limit"))) {
-            sql += " LIMIT 1000";
+            sql += " LIMIT 5000";
         }
         return sql;
     }
@@ -142,16 +142,16 @@ public class NlpDashboardService {
                             " column used for alias `value` must be a numeric datatype and type will be a meaningful name of the column used for alias `value`" +
                             " also there can be multiple different type, hence value can be calculated based on type (like count of occurrence)"
             );
-            promptBuilder.append("\nEnsure sql logic is like `SELECT {column1_name} AS name, countIf({column2 condition}) AS value, 'count of the {column2 condition}' AS type FROM table_name group by {column2_name}` ");
-//            promptBuilder.append(" for creating a ").append(reqDto.getDashboardType()).append(" visualization.")
-//                    .append("\nsample query logic: `SELECT $column1 AS 'name', COUNTIF(some condition) AS 'value', 'count of the condition' AS 'type' FROM table_name group by $column2`")
-//                    .append("\nupdate column1, column2, condition  in sample query with appropriate column names from table");
+            //promptBuilder.append("\nEnsure sql logic is like `SELECT {column1_name} AS name, countIf({column2 condition}) AS value, 'count of the {column2 condition}' AS type FROM table_name group by {column2_name}` ");
+            //promptBuilder.append(" for creating a ").append(reqDto.getDashboardType()).append(" visualization.")
+            //        .append("\nsample query logic: `SELECT $column1 AS 'name', COUNTIF(some condition) AS 'value', 'count of the condition' AS 'type' FROM table_name group by $column2`")
+            //        .append("\nupdate column1, column2, condition  in sample query with appropriate column names from table");
         }
 
         // Common instructions
         promptBuilder.append("\nEnsure column names used are available in the DATABASE SCHEMA.");
-        promptBuilder.append("\nExclude selecting columns like 'id', 'cm_id', and foreign key columns.");
-        promptBuilder.append("\nInclude 'cm_id = ").append(cmId).append("' in the WHERE clause condition.");
+        promptBuilder.append(" Exclude selecting columns like 'id', 'cm_id', and foreign key columns.");
+        promptBuilder.append(" Include 'cm_id = ").append(cmId).append("' in the WHERE clause condition.");
 
         return promptBuilder.toString();
     }

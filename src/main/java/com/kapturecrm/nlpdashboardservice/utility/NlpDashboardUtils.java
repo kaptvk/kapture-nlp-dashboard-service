@@ -28,6 +28,7 @@ public class NlpDashboardUtils {
     private static final Map<String, String> chartTypeToAlias = new HashMap<>();
 
     static {
+        //todo use regex or some better way
         entityNameToTableName.put("customer", "cm_lead_member");
         entityNameToTableName.put("customers", "cm_lead_member");
         entityNameToTableName.put("contact", "cm_contact_details");
@@ -73,10 +74,10 @@ public class NlpDashboardUtils {
                 if (entityNameToTableName.containsKey(key)) {
                     tableCount++;
                     String tableName = entityNameToTableName.get(key);
-//                    if ("cm_lead_member,cm_lead_product,cm_employee".contains(tableName)) {
-//                        futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema("cm_additional_fields_mapping", dbSchema)));
-//                        futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema("cm_additional_fields", dbSchema)));
-//                    }
+                    //if ("cm_lead_member,cm_lead_product,cm_employee".contains(tableName)) {
+                    //    futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema("cm_additional_fields_mapping", dbSchema)));
+                    //    futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema("cm_additional_fields", dbSchema)));
+                    //}
                     futures.add(threadPool.submit(() -> nlpDashboardRepo.getDatabaseTableSchema(tableName, dbSchema)));
                     tableNames.add(tableName);
                     int index = prompt.indexOf(key);
