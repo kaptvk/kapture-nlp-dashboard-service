@@ -97,7 +97,7 @@ public class ClickHouseRepository {
             ResultSet rs = ps.executeQuery(query);
             while (rs.next()) {
                 String tableName = rs.getString("name");
-                System.out.println(tableName);
+                chTableNames.add(tableName);
             }
         } catch (Exception e) {
             e.printStackTrace();
