@@ -46,8 +46,8 @@ public class NlpDashboardService {
         try {
             NlpDashboardResponse resp = new NlpDashboardResponse();
             PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
-            int cmId = partnerUser != null ? partnerUser.getCmId() : 415;
-            int empId = partnerUser != null ? partnerUser.getEmpId() : 415;
+            int cmId = partnerUser != null ? partnerUser.getCmId() : 396;
+            int empId = partnerUser != null ? partnerUser.getEmpId() : 396;
 
             NlpDashboardPrompt nlpDashboardprompt = new NlpDashboardPrompt();
             setPromptData(nlpDashboardprompt, cmId, empId, reqDto);
