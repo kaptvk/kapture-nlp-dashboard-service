@@ -92,11 +92,12 @@ public class ClickHouseRepository {
         Connection conn = null;
         try {
             conn = ClickHouseDBManager.getConnection();
-            String dbName = conn.getCatalog();
-            DatabaseMetaData metaData = conn.getMetaData();
-            ResultSet rs = metaData.getTables(dbName, null, null, new String[]{"TABLE"});
+            String query = "SELECT name FROM system.tables WHERE database IN ('kapture')";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery(query);
             while (rs.next()) {
-                chTableNames.add(rs.getString("TABLE_NAME").toLowerCase());
+                String tableName = rs.getString("name");
+                System.out.println(tableName);
             }
         } catch (Exception e) {
             e.printStackTrace();
