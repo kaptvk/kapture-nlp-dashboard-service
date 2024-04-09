@@ -30,14 +30,9 @@ public class ClickHouseDBManager {
 
     public static Connection getConnection() {
         try {
-            dbUrl = "jdbc:ch:https://ucq74nweth.ap-south-1.aws.clickhouse.cloud/my_adjetter";
             return DriverManager.getConnection(dbUrl, user, password);
-//            Properties properties = new Properties();
-//            properties.setProperty("ssl", "true");
-//            properties.setProperty("sslmode", "none"); // NONE to trust all servers; STRICT for trusted only
-//            ClickHouseDataSource dataSource = new ClickHouseDataSource(dbUrl, properties);
-//            return dataSource.getConnection(user, password);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Error clickhouse getConnection: ", e);
             throw new RuntimeException("Clickhouse Connection Error");
         }
