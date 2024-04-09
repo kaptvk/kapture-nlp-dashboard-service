@@ -16,6 +16,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<spring-ai.version>0.8.1</spring-ai.version>
+<!--		<clickhouse-java.version>0.4.6</clickhouse-java.version>-->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -75,7 +76,7 @@
 		<dependency>
 			<groupId>ru.yandex.clickhouse</groupId>
 			<artifactId>clickhouse-jdbc</artifactId>
-			<version>0.3.1</version>
+			<version>0.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

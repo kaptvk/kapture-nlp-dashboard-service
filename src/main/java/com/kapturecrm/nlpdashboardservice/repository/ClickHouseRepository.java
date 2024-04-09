@@ -4,7 +4,7 @@ package com.kapturecrm.nlpdashboardservice.repository;
 import com.kapturecrm.nlpdashboardservice.cache.TableNameToSchemaCache;
 import com.kapturecrm.nlpdashboardservice.exception.KaptureException;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
-import com.kapturecrm.nlpdashboardservice.utility.ClickHouseConnUtil;
+import com.kapturecrm.nlpdashboardservice.component.ClickHouseDBManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
@@ -18,23 +18,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 @Repository
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class NlpDashboardRepository {
+public class ClickHouseRepository {
 
     private final TableNameToSchemaCache tableNameToSchemaCache;
 
-    public List<LinkedHashMap<String, Object>> findNlpDashboardDataFromSql(String sql) throws KaptureException {
+    public List<LinkedHashMap<String, Object>> findListOfDataFromSql(String sql) throws KaptureException {
         List<LinkedHashMap<String, Object>> resp = new ArrayList<>();
         Connection conn = null;
         try {
-            conn = ClickHouseConnUtil.getConnection();
+            conn = ClickHouseDBManager.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery(sql);
+            ResultSet rs = ps.executeQuery();
             final ResultSetMetaData meta = rs.getMetaData();
             final int columnCount = meta.getColumnCount();
             while (rs.next()) {
@@ -47,15 +48,15 @@ public class NlpDashboardRepository {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("Error in findNlpDashboardDataFromSql", e);
+            log.error("Error in findListOfDataFromSql", e);
             throw new KaptureException(BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "AI generated incorrect SQL"));
         } finally {
-            ClickHouseConnUtil.closeConn(conn);
+            ClickHouseDBManager.closeConn(conn);
         }
         return resp;
     }
 
-    public void getDatabaseTableSchema(String tableName, JSONObject dbSchema) {
+    public void findDBTableSchema(String tableName, JSONObject dbSchema) {
         String tableSchema = tableNameToSchemaCache.get(tableName);
         if (tableSchema != null) {
             dbSchema.put(tableName, tableSchema);
@@ -63,7 +64,7 @@ public class NlpDashboardRepository {
         }
         Connection conn = null;
         try {
-            conn = ClickHouseConnUtil.getConnection();
+            conn = ClickHouseDBManager.getConnection();
             String dbName = conn.getCatalog();
             DatabaseMetaData metaData = conn.getMetaData();
             ResultSet rs = metaData.getColumns(dbName, null, tableName, null);
@@ -81,9 +82,27 @@ public class NlpDashboardRepository {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("Error in getDatabaseSchema", e);
+            log.error("Error in findDBTableSchema", e);
         } finally {
-            ClickHouseConnUtil.closeConn(conn);
+            ClickHouseDBManager.closeConn(conn);
+        }
+    }
+
+    public void findTableNames(HashSet<String> chTableNames) {
+        Connection conn = null;
+        try {
+            conn = ClickHouseDBManager.getConnection();
+            String dbName = conn.getCatalog();
+            DatabaseMetaData metaData = conn.getMetaData();
+            ResultSet rs = metaData.getTables(dbName, null, null, new String[]{"TABLE"});
+            while (rs.next()) {
+                chTableNames.add(rs.getString("TABLE_NAME").toLowerCase());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Error in findTableNames", e);
+        } finally {
+            ClickHouseDBManager.closeConn(conn);
         }
     }
 

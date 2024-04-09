@@ -5,9 +5,9 @@ import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpdashboardservice.exception.KaptureException;
 import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
 import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
-import com.kapturecrm.nlpdashboardservice.repository.NlpDashboardRepository;
+import com.kapturecrm.nlpdashboardservice.repository.ClickHouseRepository;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
-import com.kapturecrm.nlpdashboardservice.utility.NlpDashboardUtils;
+import com.kapturecrm.nlpdashboardservice.utility.NlpDashboardHelper;
 import com.kapturecrm.object.PartnerUser;
 import com.kapturecrm.session.SessionManager;
 import com.kapturecrm.utilobj.CommonUtils;
@@ -36,8 +36,8 @@ public class NlpDashboardService {
     @Value("${openai.apiKey}")
     private String apiKey;
 
-    private final NlpDashboardRepository nlpDashboardRepository;
-    private final NlpDashboardUtils nlpDashboardUtils;
+    private final ClickHouseRepository clickHouseRepository;
+    private final NlpDashboardHelper nlpDashboardHelper;
     private final HttpServletRequest httpServletRequest;
     private final MysqlRepo mysqlRepo;
 
@@ -62,7 +62,7 @@ public class NlpDashboardService {
             log.info("FINAL-NLP-SQL: {}", finalSql);
             System.out.println(finalSql);
 
-            List<LinkedHashMap<String, Object>> values = nlpDashboardRepository.findNlpDashboardDataFromSql(finalSql);
+            List<LinkedHashMap<String, Object>> values = clickHouseRepository.findListOfDataFromSql(finalSql);
 
             if (reqDto.getDashboardType().equalsIgnoreCase("text")) {
                 String textResp = openAiModel.generate("prompt: " + reqDto.getPrompt() +
@@ -81,7 +81,7 @@ public class NlpDashboardService {
 
             return BaseResponse.success(resp);
         } catch (KaptureException ke) {
-            log.warn("Error in generateNlpDashboard" + ke.getBaseResponse());
+            log.warn("KaptureException in generateNlpDashboard" + ke.getBaseResponse());
             return ke.getBaseResponse();
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,9 +121,8 @@ public class NlpDashboardService {
     private String getPromptForAI(int cmId, NlpDashboardReqDto reqDto) throws KaptureException {
         StringBuilder promptBuilder = new StringBuilder();
 
-        JSONObject dbSchema = new JSONObject();
-        NlpDashboardUtils.PromptInfo promptInfo = nlpDashboardUtils.convertTableNameAndFindDBSchema(reqDto.getPrompt(), dbSchema);
-        promptBuilder.append("\nPROMPT: ").append(promptInfo.prompt());
+        JSONObject dbSchema = nlpDashboardHelper.getRequiredDatabaseSchema(reqDto.getPrompt());
+        promptBuilder.append("\nPROMPT: ").append(reqDto.getPrompt());
         promptBuilder.append("\nDATABASE SCHEMA (tableName to columnName to columnDataType mapping): ").append(dbSchema);
         if (reqDto.getStartDate() != null && reqDto.getEndDate() != null) {
             promptBuilder.append("\nDATE RANGE: ").append(getTimestampForSql(reqDto.getStartDate()))
@@ -138,14 +137,14 @@ public class NlpDashboardService {
         } else {
             promptBuilder.append(
                     " select required columns for making " + reqDto.getDashboardType() +
-                            ", adding alias names (" + NlpDashboardUtils.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
+                            ", adding alias names (" + NlpDashboardHelper.getAliasForChart(reqDto.getDashboardType()) + ") ie, like `column_name as alias`" +
                             " column used for alias `value` must be a numeric datatype and type will be a meaningful name of the column used for alias `value`" +
                             " also there can be multiple different type, hence value can be calculated based on type (like count of occurrence)"
             );
             //promptBuilder.append("\nEnsure sql logic is like `SELECT {column1_name} AS name, countIf({column2 condition}) AS value, 'count of the {column2 condition}' AS type FROM table_name group by {column2_name}` ");
             //promptBuilder.append(" for creating a ").append(reqDto.getDashboardType()).append(" visualization.")
-            //        .append("\nsample query logic: `SELECT $column1 AS 'name', COUNTIF(some condition) AS 'value', 'count of the condition' AS 'type' FROM table_name group by $column2`")
-            //        .append("\nupdate column1, column2, condition  in sample query with appropriate column names from table");
+            //        .append("\n sample query logic: `SELECT $column1 AS 'name', countIf(some condition) AS 'value', 'count of the condition' AS 'type' FROM table_name group by $column2`")
+            //        .append("\n update column1, column2, condition  in sample query with appropriate column names from table");
         }
 
         // Common instructions
