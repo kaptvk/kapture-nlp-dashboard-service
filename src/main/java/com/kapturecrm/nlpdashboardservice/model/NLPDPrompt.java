@@ -13,11 +13,11 @@ import javax.persistence.Table;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "nlp_dashboard_prompt")
+@Table(name = "nlpd_prompt")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NlpDashboardPrompt {
+public class NLPDPrompt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

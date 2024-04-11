@@ -1,6 +1,6 @@
 package com.kapturecrm.nlpdashboardservice.repository;
 
-import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
+import com.kapturecrm.nlpdashboardservice.model.NLPDPrompt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -17,19 +17,19 @@ import java.util.List;
 @Repository
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class MysqlRepo {
+public class NLPDPromptRepository {
 
     private final SessionFactory sessionFactory;
 
-    public boolean addPrompt(NlpDashboardPrompt nlpDashboardprompt) {
+    public boolean addPrompt(NLPDPrompt nlpdPrompt) {
         Session session = null;
         Transaction tx = null;
         boolean success = false;
         try {
-            if (nlpDashboardprompt != null) {
+            if (nlpdPrompt != null) {
                 session = sessionFactory.openSession();
                 tx = session.beginTransaction();
-                session.saveOrUpdate(nlpDashboardprompt);
+                session.saveOrUpdate(nlpdPrompt);
                 tx.commit();
                 success = true;
             }
@@ -46,13 +46,13 @@ public class MysqlRepo {
         return success;
     }
 
-    public List<NlpDashboardPrompt> getRecentPrompts(int cmId, int empId) {
+    public List<NLPDPrompt> getRecentPrompts(int cmId, int empId) {
         Session session = null;
-        List<NlpDashboardPrompt> prompList = new ArrayList<>();
+        List<NLPDPrompt> prompList = new ArrayList<>();
         try {
             session = sessionFactory.openSession();
-            TypedQuery<NlpDashboardPrompt> query = session.createQuery(
-                    "from NlpDashboardPrompt where cmId = :cmId and empId = :empId order by createTime desc", NlpDashboardPrompt.class);
+            TypedQuery<NLPDPrompt> query = session.createQuery(
+                    "from NLPDPrompt where cmId = :cmId and empId = :empId order by createTime desc", NLPDPrompt.class);
             prompList = query.setParameter("cmId", cmId).setParameter("empId", empId)
                     .setMaxResults(5)
                     .getResultList();

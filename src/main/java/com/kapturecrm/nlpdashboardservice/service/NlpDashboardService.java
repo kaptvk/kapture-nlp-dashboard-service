@@ -3,8 +3,8 @@ package com.kapturecrm.nlpdashboardservice.service;
 import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardReqDto;
 import com.kapturecrm.nlpdashboardservice.dto.NlpDashboardResponse;
 import com.kapturecrm.nlpdashboardservice.exception.KaptureException;
-import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
-import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
+import com.kapturecrm.nlpdashboardservice.model.NLPDPrompt;
+import com.kapturecrm.nlpdashboardservice.repository.NLPDPromptRepository;
 import com.kapturecrm.nlpdashboardservice.repository.ClickHouseRepository;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
 import com.kapturecrm.nlpdashboardservice.utility.NlpDashboardHelper;
@@ -39,7 +39,7 @@ public class NlpDashboardService {
     private final ClickHouseRepository clickHouseRepository;
     private final NlpDashboardHelper nlpDashboardHelper;
     private final HttpServletRequest httpServletRequest;
-    private final MysqlRepo mysqlRepo;
+    private final NLPDPromptRepository NLPDPromptRepository;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
         String finalPrompt = "";
@@ -49,9 +49,9 @@ public class NlpDashboardService {
             int cmId = partnerUser != null ? partnerUser.getCmId() : 396;
             int empId = partnerUser != null ? partnerUser.getEmpId() : 396;
 
-            NlpDashboardPrompt nlpDashboardprompt = new NlpDashboardPrompt();
-            setPromptData(nlpDashboardprompt, cmId, empId, reqDto);
-            Thread promptSaveThread = new Thread(() -> mysqlRepo.addPrompt(nlpDashboardprompt));
+            NLPDPrompt nlpdPrompt = new NLPDPrompt();
+            setPromptData(nlpdPrompt, cmId, empId, reqDto);
+            Thread promptSaveThread = new Thread(() -> NLPDPromptRepository.addPrompt(nlpdPrompt));
             promptSaveThread.start();
 
             OpenAiChatModel openAiModel = OpenAiChatModel.withApiKey(apiKey);
@@ -77,7 +77,7 @@ public class NlpDashboardService {
             resp.setDashboardValues(values);
 
             promptSaveThread.join();
-            resp.setPromptId(nlpDashboardprompt.getId());
+            resp.setPromptId(nlpdPrompt.getId());
 
             return BaseResponse.success(resp);
         } catch (KaptureException ke) {
@@ -91,12 +91,12 @@ public class NlpDashboardService {
         }
     }
 
-    private void setPromptData(NlpDashboardPrompt nlpDashboardprompt, int cmId, int empId, NlpDashboardReqDto reqDto) {
-        nlpDashboardprompt.setCmId(cmId);
-        nlpDashboardprompt.setPrompt(reqDto.getPrompt());
-        nlpDashboardprompt.setCreateTime(CommonUtils.getCurrentTimestamp());
-        nlpDashboardprompt.setEmpId(empId);
-        nlpDashboardprompt.setDashboardType(reqDto.getDashboardType());
+    private void setPromptData(NLPDPrompt nlpdPrompt, int cmId, int empId, NlpDashboardReqDto reqDto) {
+        nlpdPrompt.setCmId(cmId);
+        nlpdPrompt.setPrompt(reqDto.getPrompt());
+        nlpdPrompt.setCreateTime(CommonUtils.getCurrentTimestamp());
+        nlpdPrompt.setEmpId(empId);
+        nlpdPrompt.setDashboardType(reqDto.getDashboardType());
     }
 
 

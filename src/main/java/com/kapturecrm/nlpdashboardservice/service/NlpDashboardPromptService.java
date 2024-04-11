@@ -1,8 +1,8 @@
 package com.kapturecrm.nlpdashboardservice.service;
 
 import com.kapturecrm.nlpdashboardservice.dto.FeedbackDto;
-import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
-import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
+import com.kapturecrm.nlpdashboardservice.model.NLPDPrompt;
+import com.kapturecrm.nlpdashboardservice.repository.NLPDPromptRepository;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
 import com.kapturecrm.object.PartnerUser;
 import com.kapturecrm.session.SessionManager;
@@ -22,18 +22,18 @@ import java.util.List;
 public class NlpDashboardPromptService {
 
     private final HttpServletRequest httpServletRequest;
-    private final MysqlRepo mysqlRepo;
+    private final NLPDPromptRepository NLPDPromptRepository;
 
     public ResponseEntity<?> updateFeedback(FeedbackDto feedbackDto) {
         try {
             if (feedbackDto != null) {
-                NlpDashboardPrompt nlpDashboardPrompt = new NlpDashboardPrompt();
-                nlpDashboardPrompt.setId(feedbackDto.getPromptId());
-                nlpDashboardPrompt.setIsSatisfied(feedbackDto.getIsSatisfied());
+                NLPDPrompt NLPDPrompt = new NLPDPrompt();
+                NLPDPrompt.setId(feedbackDto.getPromptId());
+                NLPDPrompt.setIsSatisfied(feedbackDto.getIsSatisfied());
                 if (!feedbackDto.getIsSatisfied() && feedbackDto.getFeedback() != null) {
-                    nlpDashboardPrompt.setFeedback(feedbackDto.getFeedback());
+                    NLPDPrompt.setFeedback(feedbackDto.getFeedback());
                 }
-                if (mysqlRepo.addPrompt(nlpDashboardPrompt)) {
+                if (NLPDPromptRepository.addPrompt(NLPDPrompt)) {
                     return BaseResponse.success("Feedback updated successfully.");
                 } else {
                     return BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update feedback.");
@@ -53,7 +53,7 @@ public class NlpDashboardPromptService {
             PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
             int cmId = partnerUser != null ? partnerUser.getCmId() : 396;
             int empId = partnerUser != null ? partnerUser.getEmpId() : 396;
-            List<NlpDashboardPrompt> prompts = mysqlRepo.getRecentPrompts(cmId, empId);
+            List<NLPDPrompt> prompts = NLPDPromptRepository.getRecentPrompts(cmId, empId);
             return BaseResponse.success(prompts);
         } catch (Exception e) {
             log.error("Error in getPrompt", e);
