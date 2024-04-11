@@ -3,7 +3,7 @@ package com.kapture.nlpdashboardservice.controller;
 import com.kapture.nlpdashboardservice.dto.FeedbackDto;
 import com.kapture.nlpdashboardservice.dto.NlpDashboardReqDto;
 import com.kapture.nlpdashboardservice.service.DbSchemaService;
-import com.kapture.nlpdashboardservice.service.NlpDashboardPromptService;
+import com.kapture.nlpdashboardservice.service.NLPDPromptService;
 import com.kapture.nlpdashboardservice.service.NlpDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NlpDashboardController {
 
     private final NlpDashboardService nlpDashboardService;
-    private final NlpDashboardPromptService nlpDashboardPromptService;
+    private final NLPDPromptService nlpdPromptService;
     private final DbSchemaService dbSchemaService;
 
     @PostMapping("/generate")
@@ -32,12 +32,12 @@ public class NlpDashboardController {
 
     @PostMapping("/post-feedback")
     public ResponseEntity<?> postFeedback(@RequestBody FeedbackDto feedbackDto) {
-        return nlpDashboardPromptService.updateFeedback(feedbackDto);
+        return nlpdPromptService.updateFeedback(feedbackDto);
     }
 
     @GetMapping("/get-recent-prompts")
     public ResponseEntity<?> getPrompt() {
-        return nlpDashboardPromptService.getRecentPrompts();
+        return nlpdPromptService.getRecentPrompts();
     }
 
     @GetMapping("/clear-table-schema-cache")

@@ -19,7 +19,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
-public class NlpDashboardPromptService {
+public class NLPDPromptService {
 
     private final HttpServletRequest httpServletRequest;
     private final NLPDPromptRepository nlpdPromptRepository;
