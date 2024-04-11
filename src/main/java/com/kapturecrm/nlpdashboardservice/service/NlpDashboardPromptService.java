@@ -1,14 +1,15 @@
 package com.kapturecrm.nlpdashboardservice.service;
 
 import com.kapturecrm.nlpdashboardservice.dto.FeedbackDto;
-import com.kapturecrm.nlpdashboardservice.model.NlpDashboardPrompt;
-import com.kapturecrm.nlpdashboardservice.repository.MysqlRepo;
+import com.kapturecrm.nlpdashboardservice.model.NLPDPrompt;
+import com.kapturecrm.nlpdashboardservice.repository.NLPDPromptRepository;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
 import com.kapturecrm.object.PartnerUser;
 import com.kapturecrm.session.SessionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,22 +23,19 @@ import java.util.List;
 public class NlpDashboardPromptService {
 
     private final HttpServletRequest httpServletRequest;
-    private final MysqlRepo mysqlRepo;
+    private final NLPDPromptRepository nlpdPromptRepository;
 
     public ResponseEntity<?> updateFeedback(FeedbackDto feedbackDto) {
         try {
             if (feedbackDto != null) {
-                NlpDashboardPrompt nlpDashboardPrompt = new NlpDashboardPrompt();
-                nlpDashboardPrompt.setId(feedbackDto.getPromptId());
-                nlpDashboardPrompt.setIsSatisfied(feedbackDto.getIsSatisfied());
+                NLPDPrompt NLPDPrompt = new NLPDPrompt();
+                NLPDPrompt.setId(feedbackDto.getPromptId());
+                NLPDPrompt.setIsSatisfied(feedbackDto.getIsSatisfied());
                 if (!feedbackDto.getIsSatisfied() && feedbackDto.getFeedback() != null) {
-                    nlpDashboardPrompt.setFeedback(feedbackDto.getFeedback());
+                    NLPDPrompt.setFeedback(feedbackDto.getFeedback());
                 }
-                if (mysqlRepo.addPrompt(nlpDashboardPrompt)) {
-                    return BaseResponse.success("Feedback updated successfully.");
-                } else {
-                    return BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update feedback.");
-                }
+                nlpdPromptRepository.save(NLPDPrompt);
+                return BaseResponse.success("Feedback updated successfully.");
             } else {
                 return BaseResponse.error(HttpStatus.BAD_REQUEST, "Feedback data is null.");
             }
@@ -47,13 +45,12 @@ public class NlpDashboardPromptService {
         }
     }
 
-
     public ResponseEntity<?> getRecentPrompts() {
         try {
             PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
             int cmId = partnerUser != null ? partnerUser.getCmId() : 396;
             int empId = partnerUser != null ? partnerUser.getEmpId() : 396;
-            List<NlpDashboardPrompt> prompts = mysqlRepo.getRecentPrompts(cmId, empId);
+            List<NLPDPrompt> prompts = nlpdPromptRepository.findAllByCmIdAndEmpIdOrderByCreateTimeDesc(cmId, empId, PageRequest.of(0, 5));
             return BaseResponse.success(prompts);
         } catch (Exception e) {
             log.error("Error in getPrompt", e);
