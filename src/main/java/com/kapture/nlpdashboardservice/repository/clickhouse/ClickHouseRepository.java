@@ -1,4 +1,4 @@
-package com.kapture.nlpdashboardservice.repository;
+package com.kapture.nlpdashboardservice.repository.clickhouse;
 
 
 import com.kapture.nlpdashboardservice.cache.TableNameToSchemaCache;

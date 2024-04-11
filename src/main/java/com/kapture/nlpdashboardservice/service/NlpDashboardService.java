@@ -4,7 +4,7 @@ import com.kapture.nlpdashboardservice.dto.NlpDashboardReqDto;
 import com.kapture.nlpdashboardservice.dto.NlpDashboardResponse;
 import com.kapture.nlpdashboardservice.exception.KaptureException;
 import com.kapture.nlpdashboardservice.model.NLPDPrompt;
-import com.kapture.nlpdashboardservice.repository.ClickHouseRepository;
+import com.kapture.nlpdashboardservice.repository.clickhouse.ClickHouseRepository;
 import com.kapture.nlpdashboardservice.utility.BaseResponse;
 import com.kapture.nlpdashboardservice.utility.ConversionUtil;
 import com.kapture.nlpdashboardservice.utility.NlpDashboardHelper;
@@ -37,7 +37,7 @@ public class NlpDashboardService {
     private final ClickHouseRepository clickHouseRepository;
     private final NlpDashboardHelper nlpDashboardHelper;
     private final HttpServletRequest httpServletRequest;
-    private final com.kapture.nlpdashboardservice.repository.NLPDPromptRepository NLPDPromptRepository;
+    private final com.kapture.nlpdashboardservice.repository.mysql.NLPDPromptRepository NLPDPromptRepository;
 
     public ResponseEntity<?> generateNlpDashboard(NlpDashboardReqDto reqDto) {
         String finalPrompt = "";

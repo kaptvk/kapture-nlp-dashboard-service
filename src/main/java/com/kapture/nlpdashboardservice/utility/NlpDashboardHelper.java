@@ -1,6 +1,6 @@
 package com.kapture.nlpdashboardservice.utility;
 
-import com.kapture.nlpdashboardservice.repository.ClickHouseRepository;
+import com.kapture.nlpdashboardservice.repository.clickhouse.ClickHouseRepository;
 import com.kapture.nlpdashboardservice.exception.KaptureException;
 import lombok.RequiredArgsConstructor;
 import net.sf.json.JSONObject;

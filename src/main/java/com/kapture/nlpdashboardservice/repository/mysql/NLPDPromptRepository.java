@@ -1,4 +1,4 @@
-package com.kapture.nlpdashboardservice.repository;
+package com.kapture.nlpdashboardservice.repository.mysql;
 
 import com.kapture.nlpdashboardservice.model.NLPDPrompt;
 import lombok.RequiredArgsConstructor;

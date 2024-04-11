@@ -2,7 +2,7 @@ package com.kapture.nlpdashboardservice.service;
 
 import com.kapture.nlpdashboardservice.dto.FeedbackDto;
 import com.kapture.nlpdashboardservice.model.NLPDPrompt;
-import com.kapture.nlpdashboardservice.repository.NLPDPromptRepository;
+import com.kapture.nlpdashboardservice.repository.mysql.NLPDPromptRepository;
 import com.kapture.nlpdashboardservice.utility.BaseResponse;
 import com.kapturecrm.object.PartnerUser;
 import com.kapturecrm.session.SessionManager;
