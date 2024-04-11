@@ -37,7 +37,7 @@ public class NLPDPromptService {
             return BaseResponse.success("Feedback updated successfully!");
         } catch (Exception e) {
             log.error("Error in updateFeedback", e);
-            return BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
+            return BaseResponse.error(e);
         }
     }
 
@@ -50,7 +50,7 @@ public class NLPDPromptService {
             return BaseResponse.success(prompts);
         } catch (Exception e) {
             log.error("Error in getPrompt", e);
-            return BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
+            return BaseResponse.error(e);
         }
     }
 
