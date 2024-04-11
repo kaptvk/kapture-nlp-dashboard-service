@@ -25,11 +25,10 @@ public class ClickHouseDBManager {
         password = _password;
     }
 
-//    Properties props = new Properties();
-//    props.setProperty(ClickHouseClientOption.RENAME_RESPONSE_COLUMN.getKey(),ClickHouseRenameMethod.TO_CAMELCASE_WITHOUT_PREFIX.name());
-
     public static Connection getConnection() {
         try {
+//            Properties props = new Properties();
+//            props.setProperty(ClickHouseClientOption.RENAME_RESPONSE_COLUMN.getKey(),ClickHouseRenameMethod.TO_CAMELCASE_WITHOUT_PREFIX.name());
             return DriverManager.getConnection(dbUrl, user, password);
         } catch (Exception e) {
             e.printStackTrace();

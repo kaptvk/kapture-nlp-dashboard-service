@@ -18,6 +18,14 @@ public class BaseResponse {
         private Calendar timestamp = Calendar.getInstance();
     }
 
+
+    public static ResponseEntity<?> success() {
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setStatus(true);
+        responseDto.setMessage("Success");
+        return ResponseEntity.ok(responseDto);
+    }
+
     public static ResponseEntity<ResponseDto> success(String msg) {
         ResponseDto responseDto = new ResponseDto();
         responseDto.setStatus(true);
@@ -39,6 +47,13 @@ public class BaseResponse {
         responseDto.setData(data);
         responseDto.setMessage(message);
         return ResponseEntity.ok(responseDto);
+    }
+
+    public static ResponseEntity<?> error() {
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setStatus(false);
+        responseDto.setMessage("Something went wrong!");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
     }
 
     public static ResponseEntity<ResponseDto> error(Exception e) {

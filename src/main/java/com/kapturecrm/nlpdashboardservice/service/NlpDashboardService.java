@@ -151,6 +151,7 @@ public class NlpDashboardService {
         promptBuilder.append("\nEnsure column names used are available in the DATABASE SCHEMA.");
         promptBuilder.append(" Exclude selecting columns like 'id', 'cm_id', and foreign key columns.");
         promptBuilder.append(" Include 'cm_id = ").append(cmId).append("' in the WHERE clause condition.");
+        promptBuilder.append(" Prefer sub queries over joins.");
 
         return promptBuilder.toString();
     }

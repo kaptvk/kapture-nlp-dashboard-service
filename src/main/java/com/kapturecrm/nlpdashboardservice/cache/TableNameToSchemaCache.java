@@ -35,4 +35,15 @@ public class TableNameToSchemaCache {
         }
     }
 
+    public boolean clear() {
+        try {
+            RMap<String, String> map = redissonClient.getMap(TABLE_NAME_TO_SCHEMA_MAP);
+            map.clear();
+            return true;
+        } catch (Exception e) {
+            log.error("Error in clearTableSchemaCache" + e);
+            return false;
+        }
+    }
+
 }

@@ -2,12 +2,13 @@ package com.kapturecrm.nlpdashboardservice.repository;
 
 
 import com.kapturecrm.nlpdashboardservice.cache.TableNameToSchemaCache;
+import com.kapturecrm.nlpdashboardservice.component.ClickHouseDBManager;
 import com.kapturecrm.nlpdashboardservice.exception.KaptureException;
 import com.kapturecrm.nlpdashboardservice.utility.BaseResponse;
-import com.kapturecrm.nlpdashboardservice.component.ClickHouseDBManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
@@ -72,7 +73,8 @@ public class ClickHouseRepository {
             while (rs.next()) {
                 String columnName = rs.getString("COLUMN_NAME");
                 String columnType = rs.getString("TYPE_NAME");
-                schema.put(columnName, columnType);
+                String comment = rs.getString("REMARKS");
+                schema.put(columnName, StringUtils.isEmpty(comment) ? ("Type:" + columnType) : ("Type:" + columnType + ", Remarks:" + comment));
             }
             dbSchema.put(tableName, schema);
             try {
@@ -88,13 +90,41 @@ public class ClickHouseRepository {
         }
     }
 
-    public void findTableNames(HashSet<String> chTableNames) {
+    @Deprecated
+    public void findTableSchemaByNamePattern(String tableNameKey, JSONObject schema) {
+        Connection conn = null;
+        try {
+            conn = ClickHouseDBManager.getConnection();
+            String sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name LIKE '%" + tableNameKey + "%';";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String tableName = rs.getString("table_name");
+                String columnName = rs.getString("column_name");
+                String columnType = rs.getString("data_type");
+                String comment = rs.getString("comment");
+                JSONObject tableSchema = schema.getJSONObject(tableName);
+                if (tableSchema == null || tableSchema.isNullObject()) {
+                    tableSchema = new JSONObject();
+                    schema.put(tableName, tableSchema);
+                }
+                tableSchema.put(columnName, "Type: " + columnType + ", Comment: " + comment);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Error in findTableSchema", e);
+        } finally {
+            ClickHouseDBManager.closeConn(conn);
+        }
+    }
+
+    public void findAllTableNames(HashSet<String> chTableNames) {
         Connection conn = null;
         try {
             conn = ClickHouseDBManager.getConnection();
             String query = "SELECT name FROM system.tables WHERE database IN ('kapture')";
             PreparedStatement ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery(query);
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String tableName = rs.getString("name");
                 chTableNames.add(tableName);

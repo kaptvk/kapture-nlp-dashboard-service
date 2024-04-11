@@ -59,7 +59,7 @@ public class NlpDashboardHelper {
 
     private void initializeTableNames() {
         chTableNames = new HashSet<>();
-        clickhouseRepository.findTableNames(chTableNames);
+        clickhouseRepository.findAllTableNames(chTableNames);
     }
 
     private static void waitForCompletion(List<Future<?>> futures) {
