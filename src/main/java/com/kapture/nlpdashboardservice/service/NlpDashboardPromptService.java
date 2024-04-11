@@ -22,7 +22,7 @@ import java.util.List;
 public class NlpDashboardPromptService {
 
     private final HttpServletRequest httpServletRequest;
-    private final NLPDPromptRepository NLPDPromptRepository;
+    private final NLPDPromptRepository nlpdPromptRepository;
 
     public ResponseEntity<?> updateFeedback(FeedbackDto feedbackDto) {
         try {
@@ -33,7 +33,7 @@ public class NlpDashboardPromptService {
                 if (!feedbackDto.getIsSatisfied() && feedbackDto.getFeedback() != null) {
                     NLPDPrompt.setFeedback(feedbackDto.getFeedback());
                 }
-                if (NLPDPromptRepository.addPrompt(NLPDPrompt)) {
+                if (nlpdPromptRepository.addPrompt(NLPDPrompt)) {
                     return BaseResponse.success("Feedback updated successfully.");
                 } else {
                     return BaseResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update feedback.");
@@ -53,7 +53,7 @@ public class NlpDashboardPromptService {
             PartnerUser partnerUser = SessionManager.getPartnerUser(httpServletRequest);
             int cmId = partnerUser != null ? partnerUser.getCmId() : 396;
             int empId = partnerUser != null ? partnerUser.getEmpId() : 396;
-            List<NLPDPrompt> prompts = NLPDPromptRepository.getRecentPrompts(cmId, empId);
+            List<NLPDPrompt> prompts = nlpdPromptRepository.getRecentPrompts(cmId, empId);
             return BaseResponse.success(prompts);
         } catch (Exception e) {
             log.error("Error in getPrompt", e);
