@@ -8,7 +8,7 @@
 		<version>2.4.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.kapturecrm</groupId>
+	<groupId>com.kapture</groupId>
 	<artifactId>kapture-nlp-dashboard-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>kapture-nlp-dashboard-service</name>
@@ -16,7 +16,6 @@
 	<properties>
 		<java.version>17</java.version>
 		<spring-ai.version>0.8.1</spring-ai.version>
-<!--		<clickhouse-java.version>0.4.6</clickhouse-java.version>-->
 	</properties>
 	<dependencies>
 		<dependency>
